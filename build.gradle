@@ -17,9 +17,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url 'http://p2pkit.io/maven2'
-        }
         maven { url "https://jitpack.io" }
     }
 }
@@ -55,7 +52,6 @@ ext {
     multiviewVersion = '1.2.3'
     easyRecyclerviewVersion = '4.4.2'
 
-    p2pkitVersion = '2.1.3'
     circular_imageVersion = '3.2.0'
     dexterVersion = '5.0.0'
     viewAnimator_version = '1.0.5'

@@ -4,8 +4,8 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.nepal.adversify"
-        minSdkVersion 21
-        targetSdkVersion 28
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -55,9 +55,6 @@ dependencies {
 
     //Room
     implementation "androidx.room:room-runtime:$rootProject.roomDatabase"
-    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0-beta01'
     annotationProcessor "androidx.room:room-compiler:$rootProject.roomDatabase"
     // optional - RxJava support for Room
     implementation "androidx.room:room-rxjava2:$rootProject.roomDatabase"
@@ -102,8 +99,6 @@ dependencies {
     //ViewAnimator
     implementation "com.github.florent37:viewanimator:$rootProject.viewAnimator_version"
 
-    //p2pkit
-    implementation "ch.uepaa.p2p:p2pkit-android:$rootProject.p2pkitVersion"
     //Dexter
     implementation "com.karumi:dexter:$rootProject.dexterVersion"
 

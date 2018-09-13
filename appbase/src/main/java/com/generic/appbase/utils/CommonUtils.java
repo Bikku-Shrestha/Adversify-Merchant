@@ -26,12 +26,19 @@ package com.generic.appbase.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.Patterns;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import androidx.annotation.DrawableRes;
 
 
 public final class CommonUtils {
@@ -51,6 +58,18 @@ public final class CommonUtils {
 
     public static boolean isEmailValid(String email) {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    public static byte[] drawableToByteArray(Context context, @DrawableRes int res) {
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), res);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        return stream.toByteArray();
+    }
+
+    public static Drawable byteArrayToDrawable(Context context, byte[] arr) {
+        return new BitmapDrawable(context.getResources(),
+                BitmapFactory.decodeByteArray(arr, 0, arr.length));
     }
 
 }

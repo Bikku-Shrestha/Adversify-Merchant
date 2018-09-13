@@ -22,42 +22,29 @@
  *  limitations under the License
  */
 
-package com.generic.appbase.di.module;
+package com.nepal.adversify.di.module;
 
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
-import com.generic.appbase.utils.rx.AppSchedulerProvider;
-import com.generic.appbase.utils.rx.SchedulerProvider;
+import com.nepal.adversify.R;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import io.github.inflationx.calligraphy3.CalligraphyConfig;
 
 @Module
-public class BaseAppModule {
+public class AppModule {
+
 
     @Provides
     @Singleton
-        // Application reference must come from BaseAppModule.class
-    SharedPreferences providesSharedPreferences(Context application) {
-        return PreferenceManager.getDefaultSharedPreferences(application);
+    CalligraphyConfig provideCalligraphyDefaultConfig() {
+        return new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/product-sans/ProductSans-Regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build();
     }
 
-
-    @Singleton
-    @Provides
-    Context provideContext(Application application) {
-        return application.getApplicationContext();
-    }
-
-    @Singleton
-    @Provides
-    SchedulerProvider schedulerProvider() {
-        return new AppSchedulerProvider();
-    }
 
 }

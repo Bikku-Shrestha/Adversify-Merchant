@@ -1,8 +1,11 @@
 <resources>
-    <string name="app_name">Adversify</string>
+    <string name="app_name">Adversify-Merchant</string>
     <string name="p2pkit_key">ccac10fe40224850b59c9f96cd2d5b3f</string>
     <string name="nearby_key">AIzaSyCXR5h5eHL4rMVPxoFczZkDRfWFN4IkXvo</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="value_empty">Empty Data</string>
+    <string name="value_client_connected_with_id">Client connected with id: %s</string>
+    <string name="value_broadcasting">Brodcasting…</string>
+    <string name="value_broadcasted_successfully">Information broadcasted successfully.</string>
+    <string name="value_error_broadcasting">Error broadcasting information</string>
 </resources>
