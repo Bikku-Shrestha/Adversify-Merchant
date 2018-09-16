@@ -5,7 +5,7 @@
 
     <string name="value_empty">Empty Data</string>
     <string name="value_client_connected_with_id">Client connected with id: %s</string>
-    <string name="value_broadcasting">Brodcasting…</string>
-    <string name="value_broadcasted_successfully">Information broadcasted successfully.</string>
+    <string name="value_broadcast_dummy_info">Broadcast dummy info.</string>
+    <string name="value_broadcasted_merchant_info">Broadcasted info: \n %s</string>
     <string name="value_error_broadcasting">Error broadcasting information</string>
 </resources>

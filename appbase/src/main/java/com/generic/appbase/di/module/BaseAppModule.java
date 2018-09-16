@@ -47,7 +47,6 @@ public class BaseAppModule {
         return PreferenceManager.getDefaultSharedPreferences(application);
     }
 
-
     @Singleton
     @Provides
     Context provideContext(Application application) {

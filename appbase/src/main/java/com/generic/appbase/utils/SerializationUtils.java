@@ -1,4 +1,4 @@
-package com.nepal.adversify.utils;
+package com.generic.appbase.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

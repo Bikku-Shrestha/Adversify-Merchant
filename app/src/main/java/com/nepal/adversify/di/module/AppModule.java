@@ -25,6 +25,10 @@
 package com.nepal.adversify.di.module;
 
 
+import android.content.Context;
+
+import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.nepal.adversify.R;
 
 import javax.inject.Singleton;
@@ -46,5 +50,10 @@ public class AppModule {
                 .build();
     }
 
+    @Provides
+    @Singleton
+    ConnectionsClient providesConnectionsClient(Context context) {
+        return Nearby.getConnectionsClient(context);
+    }
 
 }

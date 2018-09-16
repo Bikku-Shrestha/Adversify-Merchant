@@ -1,4 +1,4 @@
-package com.nepal.adversify.data;
+package com.generic.appbase.domain.dto;
 
 import java.io.Serializable;
 
@@ -6,7 +6,6 @@ public class BaseMerchantInfo implements Serializable {
 
     public String title;
     public String subtitle;
-    public byte[] previewImage;
     public String location;
     public String contact;
     public String specialOffer;

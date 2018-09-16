@@ -25,6 +25,7 @@
 package com.generic.appbase.utils;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -70,6 +71,18 @@ public final class CommonUtils {
     public static Drawable byteArrayToDrawable(Context context, byte[] arr) {
         return new BitmapDrawable(context.getResources(),
                 BitmapFactory.decodeByteArray(arr, 0, arr.length));
+    }
+
+    public static boolean setBluetooth(boolean enable) {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        boolean isEnabled = bluetoothAdapter.isEnabled();
+        if (enable && !isEnabled) {
+            return bluetoothAdapter.enable();
+        } else if (!enable && isEnabled) {
+            return bluetoothAdapter.disable();
+        }
+        // No need to change bluetooth state
+        return true;
     }
 
 }

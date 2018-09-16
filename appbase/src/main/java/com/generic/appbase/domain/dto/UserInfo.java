@@ -1,4 +1,4 @@
-package com.nepal.adversify.data;
+package com.generic.appbase.domain.dto;
 
 import java.io.Serializable;
 

@@ -6,18 +6,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.generic.appbase.domain.dto.UserInfo;
 import com.generic.appbase.ui.BaseFragment;
-import com.google.android.gms.nearby.Nearby;
+import com.generic.appbase.utils.CommonUtils;
+import com.generic.appbase.utils.SerializationUtils;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
-import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
-import com.google.android.gms.nearby.connection.ConnectionResolution;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
-import com.google.android.gms.nearby.connection.ConnectionsStatusCodes;
 import com.google.android.gms.nearby.connection.Payload;
-import com.google.android.gms.nearby.connection.PayloadCallback;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -25,9 +23,11 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 import com.nepal.adversify.R;
-import com.nepal.adversify.data.ActionEvent;
-import com.nepal.adversify.data.UserInfo;
-import com.nepal.adversify.utils.SerializationUtils;
+import com.nepal.adversify.data.PreferenceHelper;
+import com.nepal.adversify.domain.callback.ConnectionCallback;
+import com.nepal.adversify.domain.callback.PayloadCallback;
+import com.nepal.adversify.domain.handler.ConnectionHandler;
+import com.nepal.adversify.domain.handler.PayloadHandler;
 import com.nepal.adversify.viewmodel.HomeViewModel;
 import com.nepal.adversify.viewmodel.HomeViewModelFactory;
 
@@ -37,72 +37,38 @@ import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 import timber.log.Timber;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends BaseFragment {
+public class HomeFragment extends BaseFragment implements ConnectionCallback,
+        PayloadCallback {
 
     private static final Strategy STRATEGY = Strategy.P2P_STAR;
+
     @Inject
     HomeViewModelFactory mHomeViewModelFactory;
-    private ConnectionsClient mConnectionsClient;
-    private TextView mStatusTextView;
+    @Inject
+    PayloadHandler mPayloadHandler;
+    @Inject
+    ConnectionHandler mConnectionHandler;
+    @Inject
+    ConnectionsClient mConnectionsClient;
+    @Inject
+    PreferenceHelper mPreferenceHelper;
+
     private HomeViewModel mHomeViewModel;
-    private final PayloadCallback mPayloadCallback = new PayloadCallback() {
-        @Override
-        public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
-            Timber.d("onPayloadReceived");
-            ActionEvent actionEvent = ActionEvent.valueOf(new String(payload.asBytes(), UTF_8));
-            handleAction(endpointId, actionEvent);
-        }
 
-        @Override
-        public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate payloadTransferUpdate) {
-            Timber.d("onPayloadTransferUpdate");
-        }
-    };
-    private final ConnectionLifecycleCallback mConnectionLifecycleCallback = new ConnectionLifecycleCallback() {
-        @Override
-        public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
-            Timber.d("onConnectionInitiated");
-            Timber.d("Accepting connection with endpoint: %s", endpointId);
-
-            mConnectionsClient.acceptConnection(endpointId, mPayloadCallback);
-        }
-
-        @Override
-        public void onConnectionResult(@NonNull String endpointId, @NonNull ConnectionResolution result) {
-            Timber.d("onConnectionResult");
-            switch (result.getStatus().getStatusCode()) {
-                case ConnectionsStatusCodes.STATUS_OK:
-                    // We're connected! Can now start sending and receiving data.
-                    Timber.d("Connection successful");
-                    addConnectedClient(endpointId);
-                    sendInitialPayload(endpointId);
-                    break;
-                case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
-                    // The connection was rejected by one or both sides.
-                    break;
-                case ConnectionsStatusCodes.STATUS_ERROR:
-                    // The connection broke before it was able to be accepted.
-                    Timber.d("Connection error");
-                    break;
-            }
-        }
-
-        @Override
-        public void onDisconnected(@NonNull String endpointId) {
-            Timber.d("onDisconnected");
-            mHomeViewModel.removeConnectedClient(endpointId);
-        }
-    };
-    private ActionEvent mActionEvent;
+    private TextView mStatusTextView;
+    private Toolbar mToolbar;
+    private FloatingActionButton mAdvertiseFloatingActionButton;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -121,10 +87,15 @@ public class HomeFragment extends BaseFragment {
     protected View onViewReady(View view, Bundle savedInstanceState) {
         Timber.d("onViewReady");
 
-        mStatusTextView = view.findViewById(R.id.connectedStatus);
-        mStatusTextView.setText(R.string.value_broadcasting);
+        mToolbar = view.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
+        mToolbar.setTitle(R.string.app_name);
 
-        mConnectionsClient = Nearby.getConnectionsClient(getContext());
+        mStatusTextView = view.findViewById(R.id.connectedStatus);
+        mAdvertiseFloatingActionButton = view.findViewById(R.id.discoverButton);
+
+        mStatusTextView.setText(getString(R.string.value_broadcast_dummy_info));
 
         return view;
     }
@@ -143,6 +114,11 @@ public class HomeFragment extends BaseFragment {
             Timber.d("Total connected clients: %d", data.size());
             showToast("Total connected clients: " + data.size());
         });
+
+        mHomeViewModel.getStatusLiveData().observe(this, data -> {
+            Timber.d(data);
+            mStatusTextView.setText(data);
+        });
     }
 
     private void loadData() {
@@ -152,8 +128,9 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void permissionGranted() {
-        getView().findViewById(R.id.discoverButton).setOnClickListener((v) -> {
+        mAdvertiseFloatingActionButton.setOnClickListener((v) -> {
             Timber.d("Broadcast button clicked");
+            mAdvertiseFloatingActionButton.setEnabled(false);
             startAdvertising();
         });
     }
@@ -163,8 +140,8 @@ public class HomeFragment extends BaseFragment {
         UserInfo userInfo = mHomeViewModel.getUserInfo();
         mConnectionsClient.startAdvertising(
                 userInfo.username,
-                userInfo.id,
-                mConnectionLifecycleCallback,
+                com.generic.appbase.connection.ConnectionInfo.NEARBY_CONNECTION_SERVICE_ID,
+                mConnectionHandler,
                 new AdvertisingOptions.Builder()
                         .setStrategy(STRATEGY)
                         .build()
@@ -173,58 +150,100 @@ public class HomeFragment extends BaseFragment {
                         unusedResult -> {
                             // We're advertising!
                             Timber.d("Broadcasted successfully");
-                            mStatusTextView.setText(R.string.value_broadcasted_successfully);
+                            mHomeViewModel.setStatusMessage(
+                                    String.format(
+                                            getString(R.string.value_broadcasted_merchant_info),
+                                            mHomeViewModel.getMerchantInfo().title
+                                    )
+                            );
                         })
                 .addOnFailureListener(
                         e -> {
                             Timber.d("Error broadcasting information");
-                            mStatusTextView.setText(R.string.value_error_broadcasting);
+                            mHomeViewModel.setStatusMessage(getString(R.string.value_error_broadcasting));
                         });
     }
 
-
-    private void addConnectedClient(String endpointName) {
-        Timber.d("addConnectedClient");
-        mHomeViewModel.addConnectedClient(endpointName);
+    @Override
+    public void acceptConnection(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
+        Timber.d("acceptConnection");
+        mConnectionsClient.acceptConnection(endpointId, mPayloadHandler);
     }
 
-    private void sendInitialPayload(String endpointId) {
+    @Override
+    public void onClientConnected(String endpointId, String endpointName) {
+        Timber.d("onClientConnected");
+        mHomeViewModel.addConnectedClient(endpointId, endpointName);
+    }
+
+    @Override
+    public void onClientConnectionRejected(String endpointId, String endpointName) {
+        Timber.d("onClientConnectionRejected");
+    }
+
+    @Override
+    public void onClientConnectionError(String endpointId, String endpointName) {
+        Timber.d("onClientConnectionError");
+    }
+
+    @Override
+    public void onClientDisconnected(String endpointId) {
+        Timber.d("onClientDisconnected");
+        mHomeViewModel.removeConnectedClient(endpointId);
+    }
+
+    @Override
+    public int extractCategoryId(String endpointName) {
+        Timber.d("extractCategoryId");
+        String[] split = endpointName.split(":");
+        return Integer.parseInt(split[0]);
+    }
+
+    @Override
+    public void rejectConnection(String endpointId, ConnectionInfo connectionInfo) {
+        Timber.d("rejectConnection");
+        mConnectionsClient.rejectConnection(endpointId);
+    }
+
+    @Override
+    public boolean doesMerchantCategoryMatch(int catId) {
+        Timber.d("doesMerchantCategoryMatch");
+        int merchantCategoryId = mPreferenceHelper.getMerchantCategoryId();
+        return catId == merchantCategoryId;
+    }
+
+
+    @Override
+    public void sendInitialPayload(String endpointId) {
         Timber.d("sendInitialPayload");
         try {
-            mConnectionsClient.sendPayload(endpointId,
-                    Payload.fromBytes(
-                            SerializationUtils.serialize(mHomeViewModel.getInitialPayload())
-
-                    )
-            );
+            mPayloadHandler.sendPayload(endpointId, Payload.fromBytes(
+                    SerializationUtils.serialize(mHomeViewModel.getInitialPayload())));
         } catch (IOException e) {
             Timber.e(e);
         }
+
     }
 
-    private void sendFullPayload(String endpointId) {
-        Timber.d("sendFullPayload");
+    @Override
+    public void sendFullInfoPayload(String endpointId) {
+        Timber.d("sendFullInfoPayload");
         try {
-            mConnectionsClient.sendPayload(endpointId,
-                    Payload.fromBytes(
-                            SerializationUtils.serialize(mHomeViewModel.getMerchantInfo())
-
-                    )
-            );
+            mPayloadHandler.sendPayload(endpointId, Payload.fromBytes(
+                    SerializationUtils.serialize(mHomeViewModel.getMerchantInfo())));
         } catch (IOException e) {
             Timber.e(e);
         }
     }
 
-    private void handleAction(String endpointId, ActionEvent actionEvent) {
-        Timber.d("handleAction: %s of client: %s", actionEvent, endpointId);
-        switch (actionEvent) {
-            case ACTION_FULL_INFO:
-                sendFullPayload(endpointId);
-                break;
-            case ACTION_INITIAL_INFO:
-                break;
-        }
+    @Override
+    public void onClientPayloadSent(String endpointId) {
+        Timber.d("onClientPayloadSent");
+    }
+
+    @Override
+    public void onSendPayload(String endpointId, Payload payload) {
+        mConnectionsClient.sendPayload(endpointId, payload);
     }
 
     private void requestPermission() {
@@ -264,6 +283,7 @@ public class HomeFragment extends BaseFragment {
         Timber.d("onStop");
         mConnectionsClient.stopAllEndpoints();
         mConnectionsClient.stopAdvertising();
+        CommonUtils.setBluetooth(false);
         super.onStop();
     }
 
