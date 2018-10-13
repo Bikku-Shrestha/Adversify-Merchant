@@ -1,9 +1,12 @@
 package com.nepal.adversify.domain.handler;
 
 import com.generic.appbase.domain.dto.ActionEvent;
+import com.generic.appbase.utils.SerializationUtils;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
+
+import java.io.IOException;
 
 import javax.inject.Inject;
 
@@ -32,32 +35,32 @@ public class PayloadHandler extends PayloadCallback {
 
     @Override
     public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
-        if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
-            long payloadId = update.getPayloadId();
-            if (incomingPayloads.containsKey(payloadId)) {
-                Payload payload = incomingPayloads.remove(payloadId);
-                if (payload.getType() == Payload.Type.BYTES) {
-                    ActionEvent actionEvent = ActionEvent.valueOf(new String(payload.asBytes(), UTF_8));
-                    handleAction(endpointId, actionEvent);
-                }
-            } else if (outgoingPayloads.containsKey(payloadId)) {
-                outgoingPayloads.remove(payloadId);
-                payloadCallback.onClientPayloadSent(endpointId);
+        long payloadId = update.getPayloadId();
+        if (incomingPayloads.containsKey(payloadId)) {
+            Payload payload = incomingPayloads.remove(payloadId);
+            switch (payload.getType()) {
+                case Payload.Type.BYTES:
+                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                        ActionEvent actionEvent = ActionEvent.valueOf(new String(payload.asBytes(), UTF_8));
+                        payloadCallback.onClientRequestReceived(endpointId, payload.getId(), actionEvent);
+                    }
+                    break;
+                case Payload.Type.FILE:
+                    break;
+                case Payload.Type.STREAM:
+                    try {
+                        Object obj = SerializationUtils.deserialize(payload.asStream().asInputStream());
+                        payloadCallback.onClientInfoReceived(endpointId, payload.getId(), obj);
+                    } catch (IOException | ClassNotFoundException e) {
+                        Timber.e(e);
+                    }
+                    break;
             }
-        } else if (update.getStatus() == PayloadTransferUpdate.Status.FAILURE) {
-            Timber.d("Failed to send payload");
-        }
-    }
-
-    private void handleAction(String endpointId, ActionEvent actionEvent) {
-        Timber.d("handleAction");
-        switch (actionEvent) {
-            case ACTION_INITIAL_INFO:
-                payloadCallback.sendInitialPayload(endpointId);
-                break;
-            case ACTION_FULL_INFO:
-                payloadCallback.sendFullInfoPayload(endpointId);
-                break;
+        } else if (outgoingPayloads.containsKey(payloadId)) {
+            if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                outgoingPayloads.remove(payloadId);
+                payloadCallback.onPayloadSent(payloadId, endpointId);
+            }
         }
     }
 

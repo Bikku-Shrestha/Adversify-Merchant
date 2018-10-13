@@ -25,8 +25,8 @@
 package com.nepal.adversify.di.builder;
 
 import com.nepal.adversify.ui.MainActivity;
+import com.nepal.adversify.ui.home.HomeBinderModule;
 import com.nepal.adversify.ui.home.HomeFragment;
-import com.nepal.adversify.ui.home.HomeModule;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -34,7 +34,7 @@ import dagger.android.ContributesAndroidInjector;
 @Module
 public abstract class ActivityBuilder {
 
-    @ContributesAndroidInjector(modules = HomeModule.class)
+    @ContributesAndroidInjector(modules = {HomeBinderModule.class})
     abstract HomeFragment bindHomeFragment();
 
     @ContributesAndroidInjector()

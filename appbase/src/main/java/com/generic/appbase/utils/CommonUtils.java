@@ -34,6 +34,8 @@ import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.Patterns;
 
+import com.generic.appbase.domain.dto.Location;
+
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,4 +87,17 @@ public final class CommonUtils {
         return true;
     }
 
+
+    public static double calculateDistance(Location from, Location to) {
+
+        android.location.Location locationA = new android.location.Location("A");
+        locationA.setLatitude(from.lat);
+        locationA.setLongitude(from.lon);
+
+        android.location.Location locationB = new android.location.Location("B");
+        locationB.setLatitude(to.lat);
+        locationB.setLongitude(to.lon);
+
+        return locationA.distanceTo(locationB);
+    }
 }

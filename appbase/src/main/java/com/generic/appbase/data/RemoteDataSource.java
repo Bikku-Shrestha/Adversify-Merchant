@@ -6,7 +6,7 @@
  *
  */
 
-package com.generic.appbase.data.datasource;
+package com.generic.appbase.data;
 
 public interface RemoteDataSource {
 

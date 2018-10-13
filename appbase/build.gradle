@@ -35,6 +35,8 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$rootProject.supportLibraryVersion"
     implementation "androidx.legacy:legacy-support-v4:$rootProject.supportLibraryVersion"
 
+    implementation "com.google.android.gms:play-services-nearby:$rootProject.nearbyVersion"
+
     //RXJava 2
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.rxjava2Version"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidVersion"
@@ -52,6 +54,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.lifecycleVersion"
     //ReactiveStreams support for LiveData
     implementation "androidx.lifecycle:lifecycle-reactivestreams:$rootProject.lifecycleVersion"
+
+    //Font
+    implementation "io.github.inflationx:calligraphy3:$rootProject.calligraphyVersion"
+    implementation "io.github.inflationx:viewpump:$rootProject.viewpumpVersion"
 
     //Timber
     implementation "com.jakewharton.timber:timber:$rootProject.timberVersion"

@@ -24,6 +24,7 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.AndroidSupportInjection;
 import dagger.android.support.HasSupportFragmentInjector;
+import timber.log.Timber;
 
 public abstract class BaseFragment extends Fragment implements HasSupportFragmentInjector {
 
@@ -46,7 +47,7 @@ public abstract class BaseFragment extends Fragment implements HasSupportFragmen
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+        Timber.d("onCreateView");
         return inflater.inflate(getContentView(), container, false);
     }
 

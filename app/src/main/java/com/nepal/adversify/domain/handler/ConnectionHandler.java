@@ -25,11 +25,11 @@ public class ConnectionHandler extends ConnectionLifecycleCallback {
     @Override
     public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
         Timber.d("onConnectionInitiated");
+        incomingConnection.put(endpointId, connectionInfo);
         int catId = connectionCallback.extractCategoryId(connectionInfo.getEndpointName());
-        if (catId > 0) {
+        if (catId >= 0) {
             if (connectionCallback.doesMerchantCategoryMatch(catId)) {
                 connectionCallback.acceptConnection(endpointId, connectionInfo);
-                incomingConnection.put(endpointId, connectionInfo);
                 return;
             }
         }

@@ -8,4 +8,6 @@
     <string name="value_broadcast_dummy_info">Broadcast dummy info.</string>
     <string name="value_broadcasted_merchant_info">Broadcasted info: \n %s</string>
     <string name="value_error_broadcasting">Error broadcasting information</string>
+    <string name="distance_surfix">%s Feet</string>
+    <string name="title_connected_clients">Connected Clients</string>
 </resources>

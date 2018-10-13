@@ -25,35 +25,10 @@
 package com.nepal.adversify.di.module;
 
 
-import android.content.Context;
-
-import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.ConnectionsClient;
-import com.nepal.adversify.R;
-
-import javax.inject.Singleton;
-
 import dagger.Module;
-import dagger.Provides;
-import io.github.inflationx.calligraphy3.CalligraphyConfig;
 
 @Module
 public class AppModule {
 
-
-    @Provides
-    @Singleton
-    CalligraphyConfig provideCalligraphyDefaultConfig() {
-        return new CalligraphyConfig.Builder()
-                .setDefaultFontPath("fonts/product-sans/ProductSans-Regular.ttf")
-                .setFontAttrId(R.attr.fontPath)
-                .build();
-    }
-
-    @Provides
-    @Singleton
-    ConnectionsClient providesConnectionsClient(Context context) {
-        return Nearby.getConnectionsClient(context);
-    }
 
 }

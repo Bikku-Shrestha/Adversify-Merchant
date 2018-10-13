@@ -6,30 +6,52 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <include layout="@layout/layout_toolbar" />
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/layout_toolbar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <TextView
-            android:id="@+id/connectedStatus"
-            style="@style/AppTheme.Text.Heading2"
+            android:id="@+id/connected_clients"
+            style="@style/AppTheme.Text.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_connected_clients"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Connected Clients" />
+
+        <View
+            android:id="@+id/highlight_1"
+            android:layout_width="@dimen/space5x"
+            android:layout_height="@dimen/four_dp"
+            android:layout_marginTop="@dimen/two_dp"
+            android:background="@color/colorAccent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/connected_clients" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space"
-            android:layout_marginEnd="@dimen/space"
-            android:layout_marginBottom="@dimen/space"
-            android:gravity="center"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="@dimen/space"
+            android:padding="@dimen/four_dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+            app:layout_constraintTop_toBottomOf="@+id/highlight_1"
+            tools:itemlist="@layout/item_connected_client">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -38,9 +60,21 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:clickable="true"
-        android:focusable="true"
         app:srcCompat="@drawable/ic_wifi_tethering_black_24dp"
+        app:tint="@color/white"
+        app:useCompatPadding="true" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/manageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:backgroundTint="@color/green"
+        app:layout_anchor="@+id/discoverButton"
+        app:layout_anchorGravity="top|center_horizontal"
+        app:srcCompat="@drawable/ic_edit_black_24dp"
         app:tint="@color/white" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -29,13 +29,17 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.generic.appbase.R;
 import com.generic.appbase.utils.rx.AppSchedulerProvider;
 import com.generic.appbase.utils.rx.SchedulerProvider;
+import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.connection.ConnectionsClient;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import io.github.inflationx.calligraphy3.CalligraphyConfig;
 
 @Module
 public class BaseAppModule {
@@ -45,6 +49,21 @@ public class BaseAppModule {
         // Application reference must come from BaseAppModule.class
     SharedPreferences providesSharedPreferences(Context application) {
         return PreferenceManager.getDefaultSharedPreferences(application);
+    }
+
+    @Provides
+    @Singleton
+    CalligraphyConfig provideCalligraphyDefaultConfig() {
+        return new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/product-sans/ProductSans-Regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    ConnectionsClient providesConnectionsClient(Context context) {
+        return Nearby.getConnectionsClient(context);
     }
 
     @Singleton
