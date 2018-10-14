@@ -25,10 +25,26 @@
 package com.nepal.adversify.di.module;
 
 
+import android.app.Application;
+
+import com.nepal.adversify.BuildConfig;
+import com.nepal.adversify.data.database.AppDatabase;
+
+import javax.inject.Singleton;
+
+import androidx.room.Room;
 import dagger.Module;
+import dagger.Provides;
 
 @Module
 public class AppModule {
+
+    @Provides
+    @Singleton
+    AppDatabase providesAppDatabase(Application application) {
+        return Room.databaseBuilder(application, AppDatabase.class, BuildConfig.DATABASE_NAME)
+                .build();
+    }
 
 
 }

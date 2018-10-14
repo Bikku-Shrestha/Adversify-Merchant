@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/fragment_manage">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space"
+        android:layout_marginTop="@dimen/space"
+        android:layout_marginEnd="@dimen/space"
+        android:layout_marginBottom="@dimen/space"
+        android:orientation="vertical">
+
+        <!--Basic-->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="@dimen/four_dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/four_dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/AppTheme.Text.Regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_basic_info" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:columnCount="2"
+                    android:useDefaultMargins="true">
+
+                    <!--Row 0-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_name" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/name"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Homemade Chinese Restaurant" />
+
+                    <!--Row 1-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_address" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/address"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Pepsicola, Kathmandu, Nepal" />
+
+                    <!--Row 2-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_contact" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/contact"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="01-499009" />
+                    <!--Row 3-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_website" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/website"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="www.chineserestro.com.np" />
+                    <!--Row 4-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_image" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/image_preview"
+                        android:layout_width="@dimen/image_medium"
+                        android:layout_height="@dimen/image_medium"
+                        android:scaleType="centerInside"
+                        android:visibility="visible"
+                        tools:srcCompat="@drawable/dummy_merchant_preview" />
+
+                </GridLayout>
+
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--Description-->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="@dimen/four_dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/four_dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/AppTheme.Text.Regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_description" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/description"
+                    style="@style/AppTheme.Text.Regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    tools:text="Family restaurant with friendly environment" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--Opening hour-->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="@dimen/four_dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/four_dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/AppTheme.Text.Regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_opening_hour_info" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:columnCount="2"
+                    android:useDefaultMargins="true">
+
+                    <!--Row 0-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_sunday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/sunday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="9 AM to 6 10 PM" />
+
+                    <!--Row 1-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_monday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/monday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="9 AM to 6 10 PM" />
+
+                    <!--Row 2-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_tuesday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tuesday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="9 AM to 6 10 PM" />
+                    <!--Row 3-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_wednesday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/wednesday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="9 AM to 6 10 PM" />
+
+                    <!--Row 4-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_thursday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/thursday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="9 AM to 6 10 PM" />
+
+                    <!--Row 5-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_friday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/friday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="9 AM to 6 10 PM" />
+
+                    <!--Row 6-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_saturday" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/saturday"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Closed" />
+
+                </GridLayout>
+
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--Discount-->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="@dimen/four_dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/four_dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/AppTheme.Text.Regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_discount_info" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:columnCount="2"
+                    android:useDefaultMargins="true">
+
+                    <!--Row 0-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_title" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/title_discount"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="10%" />
+
+                    <!--Row 1-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_description" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/discount_description"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="3"
+                        tools:text="10% discount on every product" />
+
+                </GridLayout>
+
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--Deals-->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="@dimen/four_dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/four_dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/AppTheme.Text.Regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_offer_info" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:columnCount="2"
+                    android:useDefaultMargins="true">
+
+                    <!--Row 0-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_title" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/title_deals"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Rs. 300" />
+
+                    <!--Row 1-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_description" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/deal_description"
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="3"
+                        tools:text="Rs. 300 on every Rs. 1000 purchase" />
+
+                </GridLayout>
+
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/update_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/value_update"
+                app:icon="@drawable/ic_edit_black_24dp"
+                app:iconGravity="textStart" />
+
+            <Space
+                android:layout_width="@dimen/four_dp"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/value_delete_info"
+                app:icon="@drawable/ic_cancel_black_24dp"
+                app:iconGravity="textStart" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

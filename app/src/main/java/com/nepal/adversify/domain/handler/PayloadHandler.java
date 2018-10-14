@@ -1,20 +1,16 @@
 package com.nepal.adversify.domain.handler;
 
-import com.generic.appbase.domain.dto.ActionEvent;
+import com.generic.appbase.domain.dto.PayloadData;
 import com.generic.appbase.utils.SerializationUtils;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-
-import java.io.IOException;
 
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.collection.SimpleArrayMap;
 import timber.log.Timber;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class PayloadHandler extends PayloadCallback {
 
@@ -30,7 +26,11 @@ public class PayloadHandler extends PayloadCallback {
     @Override
     public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
         Timber.d("onPayloadReceived");
-        incomingPayloads.put(payload.getId(), payload);
+        if (payload.getType() == Payload.Type.BYTES) {
+            PayloadData payloadData = (PayloadData) SerializationUtils.deSerializeFromByteArray(payload.asBytes());
+            payloadCallback.onClientDataReceived(endpointId, payload.getId(), payloadData);
+        } else
+            incomingPayloads.put(payload.getId(), payload);
     }
 
     @Override
@@ -39,21 +39,10 @@ public class PayloadHandler extends PayloadCallback {
         if (incomingPayloads.containsKey(payloadId)) {
             Payload payload = incomingPayloads.remove(payloadId);
             switch (payload.getType()) {
-                case Payload.Type.BYTES:
-                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
-                        ActionEvent actionEvent = ActionEvent.valueOf(new String(payload.asBytes(), UTF_8));
-                        payloadCallback.onClientRequestReceived(endpointId, payload.getId(), actionEvent);
-                    }
-                    break;
                 case Payload.Type.FILE:
                     break;
                 case Payload.Type.STREAM:
-                    try {
-                        Object obj = SerializationUtils.deserialize(payload.asStream().asInputStream());
-                        payloadCallback.onClientInfoReceived(endpointId, payload.getId(), obj);
-                    } catch (IOException | ClassNotFoundException e) {
-                        Timber.e(e);
-                    }
+
                     break;
             }
         } else if (outgoingPayloads.containsKey(payloadId)) {

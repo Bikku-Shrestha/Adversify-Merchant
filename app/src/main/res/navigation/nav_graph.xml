@@ -8,5 +8,21 @@
         android:id="@+id/homeFragment"
         android:name="com.nepal.adversify.ui.home.HomeFragment"
         android:label="@string/app_name"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_manageFragment"
+            app:destination="@id/manageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/manageFragment"
+        android:name="com.nepal.adversify.ui.manage.ManageFragment"
+        android:label="@string/title_manage"
+        tools:layout="@layout/fragment_manage" />
+
+    <fragment
+        android:id="@+id/updateFragment"
+        android:name="com.nepal.adversify.ui.manage.UpdateFragment"
+        android:label="@string/title_update"
+        tools:layout="@layout/content_fragment_update" />
 </navigation>

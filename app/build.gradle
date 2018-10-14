@@ -102,6 +102,9 @@ dependencies {
     //Dexter
     implementation "com.karumi:dexter:$rootProject.dexterVersion"
 
+//    //Gson
+//    implementation 'com.google.code.gson:gson:2.8.5'
+
     testImplementation "junit:junit:$rootProject.junitVersion"
     androidTestImplementation "androidx.test:runner:$rootProject.runnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espressoVersion"

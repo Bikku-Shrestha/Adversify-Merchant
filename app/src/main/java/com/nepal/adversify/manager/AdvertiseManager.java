@@ -3,24 +3,26 @@ package com.nepal.adversify.manager;
 import android.content.Context;
 import android.os.Handler;
 
-import com.generic.appbase.domain.dto.ActionEvent;
+import com.generic.appbase.domain.dto.ClientInfo;
+import com.generic.appbase.domain.dto.Location;
+import com.generic.appbase.domain.dto.PayloadData;
+import com.generic.appbase.utils.CommonUtils;
 import com.generic.appbase.utils.SerializationUtils;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.Payload;
 import com.nepal.adversify.R;
-import com.nepal.adversify.data.ConnectedClient;
 import com.nepal.adversify.data.PreferenceHelper;
 import com.nepal.adversify.domain.callback.ConnectionCallback;
 import com.nepal.adversify.domain.callback.PayloadCallback;
-import com.nepal.adversify.domain.callback.RequestCallback;
 import com.nepal.adversify.domain.handler.ConnectionHandler;
 import com.nepal.adversify.domain.handler.PayloadHandler;
-import com.nepal.adversify.domain.handler.RequestHandler;
+import com.nepal.adversify.domain.model.ClientModel;
+import com.nepal.adversify.domain.model.MerchantModel;
 import com.nepal.adversify.viewmodel.HomeViewModel;
+import com.nepal.adversify.viewmodel.MerchantViewModel;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -28,36 +30,36 @@ import timber.log.Timber;
 
 import static com.generic.appbase.connection.ConnectionInfo.STRATEGY;
 
-public class AdvertiseManager implements ConnectionCallback, PayloadCallback,
-        RequestCallback {
+public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
 
     ConnectionsClient mConnectionsClient;
     PreferenceHelper mPreferenceHelper;
 
     ConnectionHandler mConnectionHandler;
     PayloadHandler mPayloadHandler;
-    RequestHandler mRequestHandler;
 
     private Context mContext;
-    private HomeViewModel mHomeViewModel;
+    private final HomeViewModel mHomeViewModel;
+    private final MerchantViewModel mMerchantViewModel;
 
     public AdvertiseManager(final Context context, HomeViewModel mHomeViewModel,
                             ConnectionsClient mConnectionsClient,
-                            PreferenceHelper mPreferenceHelper) {
+                            PreferenceHelper mPreferenceHelper,
+                            MerchantViewModel mMerchantViewModel) {
         mContext = context;
         this.mHomeViewModel = mHomeViewModel;
         this.mConnectionsClient = mConnectionsClient;
         this.mPreferenceHelper = mPreferenceHelper;
+        this.mMerchantViewModel = mMerchantViewModel;
 
         mConnectionHandler = new ConnectionHandler(this);
         mPayloadHandler = new PayloadHandler(this);
-        mRequestHandler = new RequestHandler(this);
     }
 
     public void startAdvertising() {
         // We were unable to start advertising.
         mConnectionsClient.startAdvertising(
-                Objects.requireNonNull(mHomeViewModel.getMerchantLiveData().getValue()).title,
+                Objects.requireNonNull(mMerchantViewModel.getMerchantLiveData().getValue()).title,
                 com.generic.appbase.connection.ConnectionInfo.NEARBY_CONNECTION_SERVICE_ID,
                 mConnectionHandler,
                 new AdvertisingOptions.Builder()
@@ -68,17 +70,17 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback,
                         unusedResult -> {
                             // We're advertising!
                             Timber.d("Broadcasted successfully");
-                            mHomeViewModel.setStatusMessage(
+                            mHomeViewModel.getStatusLiveData().setValue(
                                     String.format(
                                             mContext.getString(R.string.value_broadcasted_merchant_info),
-                                            mHomeViewModel.getMerchantLiveData().getValue().title
+                                            mMerchantViewModel.getMerchantLiveData().getValue().title
                                     )
                             );
                         })
                 .addOnFailureListener(
                         e -> {
                             Timber.d("Error broadcasting information");
-                            mHomeViewModel.setStatusMessage(mContext.getString(R.string.value_error_broadcasting));
+                            mHomeViewModel.getStatusLiveData().setValue(mContext.getString(R.string.value_error_broadcasting));
                         });
     }
 
@@ -101,7 +103,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback,
     @Override
     public void onClientConnected(String endpointId, String endpointName) {
         Timber.d("onClientConnected");
-        mRequestHandler.handleAction(endpointId, ActionEvent.ACTION_CLIENT_PROFILE_INFO);
+        sendInitialInfo(endpointId);
     }
 
     @Override
@@ -141,33 +143,27 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback,
         return catId == merchantCategoryId;
     }
 
-    @Override
     public void sendInitialInfo(String endpointId) {
         Timber.d("sendInitialPayload");
-        try {
-            mPayloadHandler.sendPayload(endpointId,
-                    Payload.fromStream(
-                            SerializationUtils.serialize(mHomeViewModel.getMerchantLiveData().getValue())
-                    )
-            );
-        } catch (IOException e) {
-            Timber.e(e);
-        }
+        mPayloadHandler.sendPayload(endpointId,
+                Payload.fromBytes(
+                        Objects.requireNonNull(SerializationUtils.serializeToByteArray(
+                                mMerchantViewModel.getPreviewMerchantData()
+                        ))
+                )
+        );
 
     }
 
-    @Override
     public void sendFullInfo(String endpointId) {
         Timber.d("sendFullInfoPayload");
-        try {
-            mPayloadHandler.sendPayload(endpointId,
-                    Payload.fromStream(
-                            SerializationUtils.serialize(mHomeViewModel.getMerchantLiveData().getValue())
-                    )
-            );
-        } catch (IOException e) {
-            Timber.e(e);
-        }
+        mPayloadHandler.sendPayload(endpointId,
+                Payload.fromBytes(
+                        Objects.requireNonNull(SerializationUtils.serializeToByteArray(
+                                mMerchantViewModel.getDetailMerchantInfo()
+                        ))
+                )
+        );
     }
 
     @Override
@@ -181,22 +177,30 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback,
     }
 
     @Override
-    public void onClientInfoReceived(String endpointId, long id, Object obj) {
-        Timber.d("onClientInfoReceived");
-        mHomeViewModel.addConnectedClient(endpointId, (ConnectedClient) obj);
+    public void onClientDataReceived(String endpointId, long id, Object obj) {
+        Timber.d("onClientDataReceived");
+        PayloadData payloadData = (PayloadData) obj;
+        if (payloadData.dataType == PayloadData.CLIENT_INFO_WITHOUT_IMAGE ||
+                payloadData.dataType == PayloadData.CLIENT_INFO_WITH_IMAGE) {
+            ClientModel clientModel = mapClientInfo((ClientInfo) payloadData);
+            mHomeViewModel.addConnectedClient(endpointId, clientModel);
+        } else if (payloadData.dataType == PayloadData.MERCHANT_DETAIL_INFO) {
+            sendFullInfo(endpointId);
+        }
     }
 
-    @Override
-    public void onClientRequestReceived(String endpointId, long id, ActionEvent actionEvent) {
-        Timber.d("onClientRequestReceived");
-        mRequestHandler.handleAction(endpointId, actionEvent);
-    }
-
-    @Override
-    public void requestProfileInfo(String endpointId) {
-        Timber.d("requestProfileInfo");
-        mPayloadHandler.sendPayload(endpointId,
-                Payload.fromBytes(ActionEvent.ACTION_CLIENT_PROFILE_INFO.toString().getBytes()));
+    private ClientModel mapClientInfo(ClientInfo payloadData) {
+        MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
+        ClientModel clientModel = new ClientModel();
+        clientModel.name = payloadData.name;
+        clientModel.avatar = payloadData.avatar;
+        clientModel.location = payloadData.location;
+        if (value != null) {
+            Location from = value.location;
+            Location to = payloadData.location;
+            clientModel.distance = String.valueOf((int) CommonUtils.calculateDistance(from, to));
+        }
+        return clientModel;
     }
 
 }

@@ -2,10 +2,10 @@ package com.generic.appbase.domain.dto;
 
 import java.io.Serializable;
 
-public class ClientInfo implements Serializable {
+public class ClientInfo extends PayloadData implements Serializable {
 
     public String name;
-    public byte[] avatar;
+    public String avatar;
     public Location location = new Location();
 
 }

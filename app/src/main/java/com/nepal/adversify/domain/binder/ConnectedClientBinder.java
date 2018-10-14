@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide;
 import com.generic.appbase.domain.event.OnItemClickCallback;
 import com.google.android.material.chip.Chip;
 import com.nepal.adversify.R;
-import com.nepal.adversify.data.ConnectedClient;
+import com.nepal.adversify.domain.model.ClientModel;
 
 import javax.inject.Inject;
 
@@ -20,13 +20,13 @@ import androidx.appcompat.widget.AppCompatTextView;
 import timber.log.Timber;
 
 
-public class ConnectedClientBinder extends ItemBinder<ConnectedClient, ConnectedClientBinder.ViewHolder> {
+public class ConnectedClientBinder extends ItemBinder<ClientModel, ConnectedClientBinder.ViewHolder> {
 
 
-    private OnItemClickCallback<ConnectedClient> onItemClickCallback;
+    private OnItemClickCallback<ClientModel> onItemClickCallback;
 
     @Inject
-    public ConnectedClientBinder(OnItemClickCallback<ConnectedClient> onItemClickCallback) {
+    public ConnectedClientBinder(OnItemClickCallback<ClientModel> onItemClickCallback) {
         this.onItemClickCallback = onItemClickCallback;
     }
 
@@ -36,34 +36,36 @@ public class ConnectedClientBinder extends ItemBinder<ConnectedClient, Connected
     }
 
     @Override
-    public void bind(ViewHolder holder, ConnectedClient connectedClient) {
+    public void bind(ViewHolder holder, ClientModel clientModel) {
         Timber.d("Attempting to bind discover card ");
 
-        if (connectedClient == null)
+        if (clientModel == null) {
+            Timber.d("Null client model");
             return;
+        }
 
-        holder.name.setText(connectedClient.clientInfo.name);
+        holder.name.setText(clientModel.name);
         holder.distance.setText(String.format(
                 holder.itemView.getContext().getString(R.string.distance_surfix),
-                connectedClient.distance
+                clientModel.distance
         ));
 
-        if (!TextUtils.isEmpty(new String(connectedClient.clientInfo.avatar))) {
+        if (!TextUtils.isEmpty(clientModel.avatar)) {
             Glide.with(holder.itemView.getContext())
-                    .load(connectedClient.clientInfo.avatar)
+                    .load(clientModel.avatar)
                     .into(holder.avatar);
         }
 
         holder.itemView.setOnClickListener((v) -> {
             if (onItemClickCallback != null) {
-                onItemClickCallback.onItemClick(v, holder.getAdapterPosition(), connectedClient);
+                onItemClickCallback.onItemClick(v, holder.getAdapterPosition(), clientModel);
             }
         });
     }
 
     @Override
     public boolean canBindData(Object item) {
-        return item instanceof ConnectedClient;
+        return item instanceof ClientModel;
     }
 
     @Override
@@ -71,7 +73,7 @@ public class ConnectedClientBinder extends ItemBinder<ConnectedClient, Connected
         return 1;
     }
 
-    static class ViewHolder extends ItemViewHolder<ConnectedClient> {
+    static class ViewHolder extends ItemViewHolder<ClientModel> {
 
         AppCompatTextView name;
         Chip distance;

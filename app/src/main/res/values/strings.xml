@@ -8,6 +8,31 @@
     <string name="value_broadcast_dummy_info">Broadcast dummy info.</string>
     <string name="value_broadcasted_merchant_info">Broadcasted info: \n %s</string>
     <string name="value_error_broadcasting">Error broadcasting information</string>
-    <string name="distance_surfix">%s Feet</string>
+    <string name="distance_surfix">%s Meter</string>
     <string name="title_connected_clients">Connected Clients</string>
+    <string name="title_basic_info">Basic Information</string>
+    <string name="title_name">Name</string>
+    <string name="title_address">Address</string>
+    <string name="title_contact">Contact</string>
+    <string name="title_website">Website</string>
+    <string name="title_image">Image</string>
+    <string name="title_opening_hour_info">Opening Hour Information</string>
+    <string name="title_sunday">Sunday</string>
+    <string name="title_monday">Monday</string>
+    <string name="title_tuesday">Tuesday</string>
+    <string name="title_wednesday">Wednesday</string>
+    <string name="title_thursday">Thursday</string>
+    <string name="title_friday">Friday</string>
+    <string name="title_saturday">Saturday</string>
+    <string name="title_discount_info">Discount Information</string>
+    <string name="title_title">Title</string>
+    <string name="title_description">Description</string>
+    <string name="title_offer_info">Deals Information</string>
+    <string name="value_update">Update</string>
+    <string name="value_delete_info">Delete</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_manage">Manage</string>
+    <string name="title_update">Update Merchant Info</string>
 </resources>

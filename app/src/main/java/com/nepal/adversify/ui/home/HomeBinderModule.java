@@ -9,7 +9,7 @@
 package com.nepal.adversify.ui.home;
 
 import com.generic.appbase.domain.event.OnItemClickCallback;
-import com.nepal.adversify.data.ConnectedClient;
+import com.nepal.adversify.domain.model.ClientModel;
 
 import dagger.Binds;
 import dagger.Module;
@@ -18,6 +18,6 @@ import dagger.Module;
 public abstract class HomeBinderModule {
 
     @Binds
-    abstract OnItemClickCallback<ConnectedClient> bindsOnItemClickCallback(HomeFragment homeFragment);
+    abstract OnItemClickCallback<ClientModel> bindsOnItemClickCallback(HomeFragment homeFragment);
 
 }
