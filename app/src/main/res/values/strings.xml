@@ -8,7 +8,7 @@
     <string name="value_broadcast_dummy_info">Broadcast dummy info.</string>
     <string name="value_broadcasted_merchant_info">Broadcasted info: \n %s</string>
     <string name="value_error_broadcasting">Error broadcasting information</string>
-    <string name="distance_surfix">%s Meter</string>
+    <string name="distance_surfix">%s M</string>
     <string name="title_connected_clients">Connected Clients</string>
     <string name="title_basic_info">Basic Information</string>
     <string name="title_name">Name</string>

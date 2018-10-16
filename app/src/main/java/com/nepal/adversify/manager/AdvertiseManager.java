@@ -120,7 +120,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void onClientDisconnected(String endpointId) {
         Timber.d("onClientDisconnected");
         mHomeViewModel.removeConnectedClient(endpointId);
-        restartAdvertising();
+//        restartAdvertising();
     }
 
     @Override

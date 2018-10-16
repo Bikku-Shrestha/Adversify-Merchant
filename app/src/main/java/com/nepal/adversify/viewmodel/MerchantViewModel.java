@@ -88,6 +88,8 @@ public class MerchantViewModel extends BaseViewModel {
         merchantInfo.title = merchantModel.title;
         merchantInfo.address = merchantModel.address;
         merchantInfo.contact = merchantModel.contact;
+        merchantInfo.website = merchantModel.website;
+        merchantInfo.description = merchantModel.description;
         if (merchantModel.discountModel != null) {
             merchantInfo.discountInfo = new DiscountInfo();
             merchantInfo.discountInfo.title = merchantModel.discountModel.title;
@@ -107,6 +109,9 @@ public class MerchantViewModel extends BaseViewModel {
             merchantInfo.openingInfo.thursday = merchantModel.openingModel.thursday;
             merchantInfo.openingInfo.friday = merchantModel.openingModel.friday;
             merchantInfo.openingInfo.saturday = merchantModel.openingModel.saturday;
+        }
+        if (merchantModel.location != null) {
+            merchantInfo.location = merchantModel.location;
         }
         if (merchantModel.image != null) {
             merchantInfo.previewImage = merchantModel.image.getLastPathSegment();
