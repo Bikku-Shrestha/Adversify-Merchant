@@ -4,4 +4,5 @@
     android:layout_width="@dimen/space5x"
     android:layout_height="@dimen/four_dp"
     android:layout_marginTop="@dimen/two_dp"
+    android:layout_marginBottom="@dimen/space"
     android:background="@color/colorAccent" />

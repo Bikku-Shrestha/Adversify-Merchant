@@ -27,10 +27,12 @@ package com.generic.appbase.utils;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.provider.Settings;
 import android.util.Patterns;
 
@@ -40,6 +42,7 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 import androidx.annotation.DrawableRes;
 
@@ -99,5 +102,35 @@ public final class CommonUtils {
         locationB.setLongitude(to.lon);
 
         return locationA.distanceTo(locationB);
+    }
+
+
+    public static String getPath(Context context, Uri uri) {
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            String[] projection = {"_data"};
+            Cursor cursor = null;
+            try {
+                cursor = context.getContentResolver().query(uri, projection, null, null, null);
+                int column_index = Objects.requireNonNull(cursor).getColumnIndexOrThrow("_data");
+                if (cursor.moveToFirst()) {
+                    return cursor.getString(column_index);
+                }
+            } catch (Exception e) {
+                // Eat it
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    public static String getFileExtension(String filePath) {
+        String extension = "";
+        try {
+            extension = filePath.substring(filePath.lastIndexOf("."));
+        } catch (Exception exception) {
+        }
+        return extension;
     }
 }

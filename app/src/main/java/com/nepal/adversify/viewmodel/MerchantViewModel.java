@@ -10,6 +10,7 @@ import com.generic.appbase.domain.dto.PayloadData;
 import com.generic.appbase.domain.dto.PreviewMerchantInfo;
 import com.generic.appbase.domain.dto.SpecialOfferInfo;
 import com.generic.appbase.ui.BaseViewModel;
+import com.generic.appbase.utils.FileUtils;
 import com.nepal.adversify.data.repository.MerchantRepository;
 import com.nepal.adversify.domain.model.MerchantModel;
 
@@ -17,21 +18,26 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+import io.reactivex.CompletableObserver;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class MerchantViewModel extends BaseViewModel {
 
     final private MutableLiveData<Request> request = new MutableLiveData<>();
     private final MutableLiveData<Uri> selectedImage = new MutableLiveData<>();
     private MerchantRepository mMerchantRepository;
+    private final CompositeDisposable mDisposable;
     private final LiveData<MerchantModel> merchantMutableLiveData = Transformations.switchMap(request,
             input -> mMerchantRepository.loadMerchantData()
     );
 
     public MerchantViewModel(@NonNull Application application,
-                             MerchantRepository mMerchantRepository) {
+                             MerchantRepository mMerchantRepository,
+                             CompositeDisposable mDisposable) {
         super(application);
         this.mMerchantRepository = mMerchantRepository;
-
+        this.mDisposable = mDisposable;
     }
 
     public void loadMerchantData() {
@@ -47,8 +53,24 @@ public class MerchantViewModel extends BaseViewModel {
         return selectedImage;
     }
 
-    public void updateData(MerchantModel merchantModel) {
-        mMerchantRepository.update(merchantModel);
+    public void updateData(MerchantModel merchantModel, CompletableObserver observer) {
+        mMerchantRepository.update(merchantModel)
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        observer.onComplete();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        observer.onError(e);
+                    }
+                });
     }
 
     public void updateLocation(double latitude, double longitude) {
@@ -57,6 +79,7 @@ public class MerchantViewModel extends BaseViewModel {
 
     @Override
     protected void onCleared() {
+        mDisposable.dispose();
         mMerchantRepository.onCleared();
         super.onCleared();
     }
@@ -72,12 +95,13 @@ public class MerchantViewModel extends BaseViewModel {
         if (merchantModel.offerModel != null)
             merchantInfo.specialOffer = merchantModel.offerModel.title;
         if (merchantModel.image != null) {
-            merchantInfo.previewImage = merchantModel.image.getLastPathSegment();
-            merchantInfo.dataType = PayloadData.MERCHANT_PREVIEW_INFO_WITH_IMAGE;
+            merchantInfo.fileName = FileUtils.getExtensionWithName(getApplication(), merchantModel.image);
+            merchantInfo.hasFile = true;
         } else {
-            merchantInfo.dataType = PayloadData.MERCHANT_PREVIEW_INFO_WITHOUT_IMAGE;
-
+            merchantInfo.hasFile = false;
         }
+
+        merchantInfo.dataType = PayloadData.MERCHANT_PREVIEW_INFO;
 
         return merchantInfo;
     }
@@ -114,10 +138,15 @@ public class MerchantViewModel extends BaseViewModel {
             merchantInfo.location = merchantModel.location;
         }
         if (merchantModel.image != null) {
-            merchantInfo.previewImage = merchantModel.image.getLastPathSegment();
+            merchantInfo.fileName = FileUtils.getExtensionWithName(getApplication(), merchantModel.image);
+            merchantInfo.hasFile = true;
+        } else {
+            merchantInfo.hasFile = false;
         }
         merchantInfo.dataType = PayloadData.MERCHANT_DETAIL_INFO;
 
         return merchantInfo;
     }
+
+
 }

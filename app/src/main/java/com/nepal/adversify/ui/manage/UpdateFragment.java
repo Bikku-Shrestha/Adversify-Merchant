@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.generic.appbase.domain.dto.Category;
 import com.generic.appbase.domain.dto.Location;
 import com.generic.appbase.manager.GPSLocationManager;
 import com.generic.appbase.ui.BaseFragment;
@@ -24,16 +26,22 @@ import com.nepal.adversify.domain.model.OpeningModel;
 import com.nepal.adversify.viewmodel.MerchantViewModel;
 import com.nepal.adversify.viewmodel.MerchantViewModelFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
+import io.reactivex.CompletableObserver;
+import io.reactivex.disposables.Disposable;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
@@ -55,6 +63,7 @@ public class UpdateFragment extends BaseFragment {
     private TextInputEditText mWebsiteInputEditText;
     private TextInputEditText mDescriptionInputEditText;
     private AppCompatImageView mPreviewImageView;
+    private AppCompatSpinner mCategorySpinner;
 
     //Opening information views
     private TextInputEditText mSundayInputEditText;
@@ -73,7 +82,6 @@ public class UpdateFragment extends BaseFragment {
     private TextInputEditText mOfferTitleInputEditText;
     private TextInputEditText mOfferDescriptionInputEditText;
 
-    private AppCompatImageButton mImagePickerButton;
     private AppCompatImageButton mImageClearButton;
     private MaterialButton mUpdateButton;
 
@@ -104,7 +112,7 @@ public class UpdateFragment extends BaseFragment {
         NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
 
         mUpdateButton = view.findViewById(R.id.update_button);
-        mImagePickerButton = view.findViewById(R.id.image_picker_button);
+        AppCompatImageButton mImagePickerButton = view.findViewById(R.id.image_picker_button);
         mImageClearButton = view.findViewById(R.id.image_clear_button);
         mUpdateButton.setOnClickListener((v) -> {
             Timber.d("Update button clicked");
@@ -113,10 +121,11 @@ public class UpdateFragment extends BaseFragment {
         });
         mImagePickerButton.setOnClickListener((v) -> {
             Timber.d("Image picker button clicked");
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-            startActivityForResult(intent, OPEN_DOCUMENT_CODE);
+
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            // Start the Intent
+            startActivityForResult(galleryIntent, OPEN_DOCUMENT_CODE);
 
         });
         mImageClearButton.setOnClickListener((v) -> {
@@ -145,10 +154,14 @@ public class UpdateFragment extends BaseFragment {
         mOfferTitleInputEditText = view.findViewById(R.id.input_offer_title);
         mOfferDescriptionInputEditText = view.findViewById(R.id.input_offer_desc);
 
+        mCategorySpinner = view.findViewById(R.id.category_spinner);
         mProgressBar = view.findViewById(R.id.progress);
+
+        initCategorySpinner(view);
 
         return view;
     }
+
 
     @Override
     protected int getContentView() {
@@ -186,6 +199,32 @@ public class UpdateFragment extends BaseFragment {
         });
     }
 
+    private void initCategorySpinner(View view) {
+
+        List<Category> categories = new ArrayList<>();
+        categories.add(Category.BARS);
+        categories.add(Category.COFFEE_SHOPS);
+        categories.add(Category.RESTAURANTS);
+        categories.add(Category.HOTELS);
+        categories.add(Category.MOVIE_THEATERS);
+        categories.add(Category.PHARMACIES);
+        categories.add(Category.ELECTRONIC_STORES);
+        categories.add(Category.CLOTHING_STORES);
+        categories.add(Category.BEAUTY_SALON);
+        categories.add(Category.BAKERY);
+        categories.add(Category.SHOPPING_MALL);
+        categories.add(Category.DEPARTMENT_STORE);
+
+        ArrayAdapter<Category> dataAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,
+                categories);
+
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        mCategorySpinner.setAdapter(dataAdapter);
+
+    }
+
     private void fillOfferInfo(MerchantModel data) {
         mOfferTitleInputEditText.setText(data.offerModel.title);
         mOfferDescriptionInputEditText.setText(data.offerModel.description);
@@ -212,6 +251,7 @@ public class UpdateFragment extends BaseFragment {
         mContactInputEditText.setText(data.contact);
         mWebsiteInputEditText.setText(data.website);
         mDescriptionInputEditText.setText(data.description);
+        mCategorySpinner.setSelection(data.category.ordinal());
         if (data.image != null) {
             mPreviewImageView.setVisibility(View.VISIBLE);
             mImageClearButton.setVisibility(View.VISIBLE);
@@ -232,6 +272,7 @@ public class UpdateFragment extends BaseFragment {
         final String contact = mContactInputEditText.getEditableText().toString().trim();
         final String website = mWebsiteInputEditText.getEditableText().toString().trim();
         final String description = mDescriptionInputEditText.getEditableText().toString().trim();
+        final Category category = (Category) mCategorySpinner.getSelectedItem();
         final Uri image = mMerchantViewModel.getSelectedImage().getValue();
 
         final String sunday = mSundayInputEditText.getEditableText().toString().trim();
@@ -323,6 +364,7 @@ public class UpdateFragment extends BaseFragment {
             merchantModel.contact = contact;
             merchantModel.website = website;
             merchantModel.image = image;
+            merchantModel.category = category;
             merchantModel.description = description;
 
             merchantModel.openingModel = new OpeningModel();
@@ -350,11 +392,30 @@ public class UpdateFragment extends BaseFragment {
             merchantModel.location.lat = location.getLatitude();
             merchantModel.location.lon = location.getLongitude();
 
-            mMerchantViewModel.updateData(merchantModel);
-            mProgressBar.setVisibility(View.GONE);
-            mUpdateButton.setVisibility(View.VISIBLE);
-            showToast("Updated successfully!");
-            Navigation.findNavController(view).navigateUp();
+            mMerchantViewModel.updateData(merchantModel, new CompletableObserver() {
+                @Override
+                public void onSubscribe(Disposable d) {
+                }
+
+                @Override
+                public void onComplete() {
+                    Timber.d("Data updated on database");
+                    showToast("Updated successfully!");
+                    mProgressBar.setVisibility(View.GONE);
+                    mUpdateButton.setVisibility(View.VISIBLE);
+                    Navigation.findNavController(view).navigateUp();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Timber.e(e, "Error updating database");
+                    mProgressBar.setVisibility(View.GONE);
+                    mUpdateButton.setVisibility(View.VISIBLE);
+                    showToast("Error updating data!");
+                }
+            });
+
+
         });
 
     }
@@ -363,7 +424,6 @@ public class UpdateFragment extends BaseFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == OPEN_DOCUMENT_CODE && resultCode == RESULT_OK) {
             if (resultData != null) {
-                // this is the image selected by the user
                 mMerchantViewModel.getSelectedImage().setValue(resultData.getData());
             }
         }

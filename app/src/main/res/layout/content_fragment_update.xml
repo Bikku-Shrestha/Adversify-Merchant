@@ -27,8 +27,7 @@
         <!-- Name Label -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_name"
@@ -135,6 +134,21 @@
             style="@style/AppTheme.Text.Regular"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/title_category" />
+
+        <include layout="@layout/view_highlight_1" />
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/category_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:prompt="@string/prompt_select_category" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            style="@style/AppTheme.Text.Regular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space"
             android:text="@string/title_description" />
 
         <include layout="@layout/view_highlight_1" />
@@ -142,8 +156,7 @@
         <!-- Description Label -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_description"
@@ -164,8 +177,7 @@
         <!-- Sunday Label -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_sunday"
@@ -270,8 +282,7 @@
         <!-- Discount title Label -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_discount_title"
@@ -306,8 +317,7 @@
         <!-- Deals title Label -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_offer_title"

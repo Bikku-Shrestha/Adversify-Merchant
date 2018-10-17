@@ -2,10 +2,14 @@ package com.nepal.adversify.manager;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 
+import com.generic.appbase.domain.dto.Category;
 import com.generic.appbase.domain.dto.ClientInfo;
+import com.generic.appbase.domain.dto.DetailMerchantInfo;
 import com.generic.appbase.domain.dto.Location;
 import com.generic.appbase.domain.dto.PayloadData;
+import com.generic.appbase.domain.dto.PreviewMerchantInfo;
 import com.generic.appbase.utils.CommonUtils;
 import com.generic.appbase.utils.SerializationUtils;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -13,7 +17,6 @@ import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.Payload;
 import com.nepal.adversify.R;
-import com.nepal.adversify.data.PreferenceHelper;
 import com.nepal.adversify.domain.callback.ConnectionCallback;
 import com.nepal.adversify.domain.callback.PayloadCallback;
 import com.nepal.adversify.domain.handler.ConnectionHandler;
@@ -23,6 +26,7 @@ import com.nepal.adversify.domain.model.MerchantModel;
 import com.nepal.adversify.viewmodel.HomeViewModel;
 import com.nepal.adversify.viewmodel.MerchantViewModel;
 
+import java.io.FileNotFoundException;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -33,7 +37,6 @@ import static com.generic.appbase.connection.ConnectionInfo.STRATEGY;
 public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
 
     ConnectionsClient mConnectionsClient;
-    PreferenceHelper mPreferenceHelper;
 
     ConnectionHandler mConnectionHandler;
     PayloadHandler mPayloadHandler;
@@ -44,12 +47,10 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
 
     public AdvertiseManager(final Context context, HomeViewModel mHomeViewModel,
                             ConnectionsClient mConnectionsClient,
-                            PreferenceHelper mPreferenceHelper,
                             MerchantViewModel mMerchantViewModel) {
         mContext = context;
         this.mHomeViewModel = mHomeViewModel;
         this.mConnectionsClient = mConnectionsClient;
-        this.mPreferenceHelper = mPreferenceHelper;
         this.mMerchantViewModel = mMerchantViewModel;
 
         mConnectionHandler = new ConnectionHandler(this);
@@ -139,31 +140,68 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     @Override
     public boolean doesMerchantCategoryMatch(int catId) {
         Timber.d("doesMerchantCategoryMatch");
-        int merchantCategoryId = mPreferenceHelper.getMerchantCategoryId();
-        return catId == merchantCategoryId;
+        Category category = Objects.requireNonNull(mMerchantViewModel.getMerchantLiveData().getValue()).category;
+        return catId == category.ordinal();
     }
 
     public void sendInitialInfo(String endpointId) {
         Timber.d("sendInitialPayload");
-        mPayloadHandler.sendPayload(endpointId,
-                Payload.fromBytes(
+        PreviewMerchantInfo previewMerchantData = mMerchantViewModel.getPreviewMerchantData();
+        if (previewMerchantData.hasFile) {
+            MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
+            try {
+                ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(value.image, "r");
+                Payload payloadImage = Payload.fromFile(pfd);
+                previewMerchantData.fileId = payloadImage.getId();
+
+                mPayloadHandler.sendPayload(endpointId, Payload.fromBytes(
                         Objects.requireNonNull(SerializationUtils.serializeToByteArray(
-                                mMerchantViewModel.getPreviewMerchantData()
+                                previewMerchantData
                         ))
-                )
-        );
+                ));
+                mPayloadHandler.sendPayload(endpointId, payloadImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            mPayloadHandler.sendPayload(endpointId, Payload.fromBytes(
+                    Objects.requireNonNull(SerializationUtils.serializeToByteArray(
+                            previewMerchantData
+                    ))
+            ));
+        }
 
     }
 
     public void sendFullInfo(String endpointId) {
         Timber.d("sendFullInfoPayload");
-        mPayloadHandler.sendPayload(endpointId,
-                Payload.fromBytes(
+        DetailMerchantInfo detailMerchantInfo = mMerchantViewModel.getDetailMerchantInfo();
+        if (detailMerchantInfo.hasFile) {
+            MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
+            try {
+                ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(value.image, "r");
+                Payload payloadImage = Payload.fromFile(pfd);
+                detailMerchantInfo.fileId = payloadImage.getId();
+
+                mPayloadHandler.sendPayload(endpointId, Payload.fromBytes(
                         Objects.requireNonNull(SerializationUtils.serializeToByteArray(
-                                mMerchantViewModel.getDetailMerchantInfo()
+                                detailMerchantInfo
                         ))
-                )
-        );
+                ));
+
+                mPayloadHandler.sendPayload(endpointId, payloadImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            mPayloadHandler.sendPayload(endpointId,
+                    Payload.fromBytes(
+                            Objects.requireNonNull(SerializationUtils.serializeToByteArray(
+                                    detailMerchantInfo
+                            ))
+                    )
+            );
+        }
     }
 
     @Override
@@ -180,8 +218,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void onClientDataReceived(String endpointId, long id, Object obj) {
         Timber.d("onClientDataReceived");
         PayloadData payloadData = (PayloadData) obj;
-        if (payloadData.dataType == PayloadData.CLIENT_INFO_WITHOUT_IMAGE ||
-                payloadData.dataType == PayloadData.CLIENT_INFO_WITH_IMAGE) {
+        if (payloadData.dataType == PayloadData.CLIENT_INFO) {
             ClientModel clientModel = mapClientInfo((ClientInfo) payloadData);
             mHomeViewModel.addConnectedClient(endpointId, clientModel);
         } else if (payloadData.dataType == PayloadData.MERCHANT_DETAIL_INFO) {
@@ -192,6 +229,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     private ClientModel mapClientInfo(ClientInfo payloadData) {
         MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
         ClientModel clientModel = new ClientModel();
+        clientModel.id = payloadData.id;
         clientModel.name = payloadData.name;
         clientModel.avatar = payloadData.avatar;
         clientModel.location = payloadData.location;

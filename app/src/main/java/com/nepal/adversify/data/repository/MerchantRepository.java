@@ -4,6 +4,7 @@ package com.nepal.adversify.data.repository;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.generic.appbase.domain.dto.Category;
 import com.generic.appbase.domain.dto.Location;
 import com.generic.appbase.utils.rx.SchedulerProvider;
 import com.nepal.adversify.data.dao.DiscountDAO;
@@ -70,23 +71,24 @@ public class MerchantRepository {
             model.website = input.website;
             model.contact = input.contact;
             model.description = input.description;
+            model.category = Category.valueOf(input.category);
             model.image = TextUtils.isEmpty(input.image) ? null : Uri.parse(input.image);
 
-            if (input.discountId != 0) {
+            if (input.discountId != 1) {
                 model.discountModel = new DiscountModel();
                 model.discountModel.id = input.discountId;
                 model.discountModel.title = input.discountTitle;
                 model.discountModel.description = input.discountDescription;
             }
 
-            if (input.offerId != 0) {
+            if (input.offerId != 1) {
                 model.offerModel = new OfferModel();
                 model.offerModel.id = input.offerId;
                 model.offerModel.title = input.offerTitle;
                 model.offerModel.description = input.offerDescription;
             }
 
-            if (input.openingId != 0) {
+            if (input.openingId != 1) {
                 model.openingModel = new OpeningModel();
                 model.openingModel.id = input.openingId;
                 model.openingModel.sunday = input.sunday;
@@ -98,7 +100,7 @@ public class MerchantRepository {
                 model.openingModel.saturday = input.saturday;
             }
 
-            if (input.locationId != 0) {
+            if (input.locationId != 1) {
                 model.location = new Location();
                 model.location.lat = input.lat;
                 model.location.lon = input.lon;
@@ -109,47 +111,54 @@ public class MerchantRepository {
         });
     }
 
-    public void update(MerchantModel merchantModel) {
+    public Completable update(MerchantModel merchantModel) {
 
-        Completable.fromAction(() -> {
+        return Completable.fromAction(() -> {
+
+            MerchantEntity merchantEntity = new MerchantEntity();
 
             LocationEntity locationEntity = new LocationEntity();
-            locationEntity.id = 0;
             if (merchantModel.location != null) {
-                locationEntity.id = 1;
+                locationEntity.id = 2;
                 locationEntity.lat = merchantModel.location.lat;
                 locationEntity.lon = merchantModel.location.lon;
 
                 Timber.d("inserting location");
                 mLocationDAO.insert(locationEntity);
+                merchantEntity.location = locationEntity.id;
+            } else {
+                merchantEntity.location = 1;
             }
 
             DiscountEntity discountEntity = new DiscountEntity();
-            discountEntity.id = 0;
             if (merchantModel.discountModel != null) {
-                discountEntity.id = 1;
+                discountEntity.id = 2;
                 discountEntity.title = merchantModel.discountModel.title;
                 discountEntity.description = merchantModel.discountModel.description;
 
                 Timber.d("inserting discount");
                 mDiscountDAO.insert(discountEntity);
+                merchantEntity.discount = discountEntity.id;
+            } else {
+                merchantEntity.discount = 1;
             }
 
             SpecialOfferEntity offerEntity = new SpecialOfferEntity();
-            offerEntity.id = 0;
             if (merchantModel.offerModel != null) {
-                offerEntity.id = 1;
+                offerEntity.id = 2;
                 offerEntity.title = merchantModel.offerModel.title;
                 offerEntity.description = merchantModel.offerModel.description;
 
                 Timber.d("inserting offer");
                 mOfferDAO.insert(offerEntity);
+                merchantEntity.offer = offerEntity.id;
+            } else {
+                merchantEntity.offer = 1;
             }
 
             OpeningEntity openingEntity = new OpeningEntity();
-            openingEntity.id = 0;
             if (merchantModel.openingModel != null) {
-                openingEntity.id = 1;
+                openingEntity.id = 2;
                 openingEntity.sunday = merchantModel.openingModel.sunday;
                 openingEntity.monday = merchantModel.openingModel.monday;
                 openingEntity.tuesday = merchantModel.openingModel.tuesday;
@@ -160,48 +169,31 @@ public class MerchantRepository {
 
                 Timber.d("inserting opening");
                 mOpeningDAO.insert(openingEntity);
+                merchantEntity.opening = openingEntity.id;
+            } else {
+                merchantEntity.opening = 1;
             }
 
-            MerchantEntity merchantEntity = new MerchantEntity();
             merchantEntity.id = 1;
             merchantEntity.title = merchantModel.title;
             merchantEntity.address = merchantModel.address;
             merchantEntity.contact = merchantModel.contact;
             merchantEntity.website = merchantModel.website;
+            merchantEntity.category = merchantModel.category.name();
             merchantEntity.description = merchantModel.description;
             merchantEntity.image = merchantModel.image == null ? "" : merchantModel.image.toString();
-            merchantEntity.location = locationEntity.id;
-            merchantEntity.opening = openingEntity.id;
-            merchantEntity.discount = discountEntity.id;
-            merchantEntity.offer = offerEntity.id;
 
             mMerchantDAO.insert(merchantEntity);
-        })
-                .subscribeOn(mScheduler.io())
-                .observeOn(mScheduler.ui())
-                .subscribe(new CompletableObserver() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        mDisposable.add(d);
-                    }
+        }).subscribeOn(mScheduler.io())
+                .observeOn(mScheduler.ui());
 
-                    @Override
-                    public void onComplete() {
-                        Timber.d("Data updated on database");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Timber.e(e, "Error updating database");
-                    }
-                });
 
     }
 
     public void updateLocation(double latitude, double longitude) {
         Completable.fromAction(() -> {
             LocationEntity locationEntity = new LocationEntity();
-            locationEntity.id = 1;
+            locationEntity.id = 2;
             locationEntity.lat = latitude;
             locationEntity.lon = longitude;
 

@@ -99,7 +99,22 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="www.chineserestro.com.np" />
+
                     <!--Row 4-->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        style="@style/AppTheme.Text.Regular.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_category" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/category_chip"
+                        style="@style/AppTheme.Text.Regular.Small.Light"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:chipBackgroundColor="@color/green"
+                        tools:text="Restaurant" />
+                    <!--Row 5-->
                     <androidx.appcompat.widget.AppCompatTextView
                         style="@style/AppTheme.Text.Regular.Small"
                         android:layout_width="wrap_content"

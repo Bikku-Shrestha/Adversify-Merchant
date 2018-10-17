@@ -20,7 +20,6 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.nepal.adversify.R;
-import com.nepal.adversify.data.PreferenceHelper;
 import com.nepal.adversify.domain.binder.ConnectedClientBinder;
 import com.nepal.adversify.domain.model.ClientModel;
 import com.nepal.adversify.manager.AdvertiseManager;
@@ -61,18 +60,13 @@ public class HomeFragment extends BaseFragment implements
     ConnectedClientBinder mBinder;
     @Inject
     ConnectionsClient mConnectionsClient;
-    @Inject
-    PreferenceHelper mPreferenceHelper;
 
     private AdvertiseManager mAdvertiseManager;
     private HomeViewModel mHomeViewModel;
     private MerchantViewModel mMerchantViewModel;
     private SimpleRecyclerAdapter<ClientModel, ConnectedClientBinder> mConnectedAdapter;
 
-    private Toolbar mToolbar;
     private FloatingActionButton mAdvertiseFloatingActionButton;
-    private FloatingActionButton mManageFloatingActionButton;
-    private RecyclerView mRecyclerView;
 
     private boolean isMerchantInfoAvailable = false;
     private boolean isPermissionGranted = false;
@@ -88,7 +82,7 @@ public class HomeFragment extends BaseFragment implements
         mMerchantViewModel = ViewModelProviders.of(getActivity(), merchantViewModelFactory).get(MerchantViewModel.class);
         mHomeViewModel = ViewModelProviders.of(getActivity(), mHomeViewModelFactory).get(HomeViewModel.class);
         mAdvertiseManager = new AdvertiseManager(getContext(), mHomeViewModel, mConnectionsClient,
-                mPreferenceHelper, mMerchantViewModel);
+                mMerchantViewModel);
         observeData();
         loadData();
     }
@@ -97,12 +91,12 @@ public class HomeFragment extends BaseFragment implements
     protected View onViewReady(View view, Bundle savedInstanceState) {
         Timber.d("onViewReady");
 
-        mToolbar = view.findViewById(R.id.toolbar);
+        Toolbar mToolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
 
         mAdvertiseFloatingActionButton = view.findViewById(R.id.discoverButton);
-        mManageFloatingActionButton = view.findViewById(R.id.manageButton);
+        FloatingActionButton mManageFloatingActionButton = view.findViewById(R.id.manageButton);
         mManageFloatingActionButton.setOnClickListener((v) -> {
             Timber.d("Manage button clicked");
             NavOptions navOptions = new NavOptions.Builder()
@@ -125,7 +119,7 @@ public class HomeFragment extends BaseFragment implements
             }
         });
 
-        mRecyclerView = view.findViewById(R.id.recycler_view);
+        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setHasFixedSize(true);
         mConnectedAdapter = new SimpleRecyclerAdapter<>(mBinder);
@@ -167,7 +161,9 @@ public class HomeFragment extends BaseFragment implements
         Dexter.withActivity(getActivity())
                 .withPermissions(
                         Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
                 .withListener(new MultiplePermissionsListener() {
                     @Override
@@ -229,14 +225,6 @@ public class HomeFragment extends BaseFragment implements
     }
 
     @Override
-    public void onStop() {
-        Timber.d("onStop");
-        mAdvertiseFloatingActionButton.setEnabled(true);
-        mAdvertiseManager.stopAdvertising();
-        super.onStop();
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
         Timber.d("onStart");
@@ -246,5 +234,11 @@ public class HomeFragment extends BaseFragment implements
     @Override
     public void onItemClick(View v, int position, ClientModel clientModel) {
 
+    }
+
+    @Override
+    public void onDestroy() {
+        mAdvertiseManager.stopAdvertising();
+        super.onDestroy();
     }
 }

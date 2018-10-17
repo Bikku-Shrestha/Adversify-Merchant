@@ -7,6 +7,7 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 import com.generic.appbase.ui.BaseFragment;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
 import com.nepal.adversify.R;
 import com.nepal.adversify.domain.model.MerchantModel;
 import com.nepal.adversify.viewmodel.MerchantViewModel;
@@ -40,6 +41,7 @@ public class ManageFragment extends BaseFragment {
     private AppCompatTextView mContactTextView;
     private AppCompatTextView mWebsiteTextView;
     private AppCompatImageView mImagePreviewImageView;
+    private Chip mCategoryChip;
 
     //Description views
     private AppCompatTextView mDescriptionTextView;
@@ -106,6 +108,7 @@ public class ManageFragment extends BaseFragment {
         mAddressTextView = view.findViewById(R.id.address);
         mContactTextView = view.findViewById(R.id.contact);
         mWebsiteTextView = view.findViewById(R.id.website);
+        mCategoryChip = view.findViewById(R.id.category_chip);
         mImagePreviewImageView = view.findViewById(R.id.image_preview);
         mDiscountTitleTextView = view.findViewById(R.id.title_discount);
         mDiscountDescriptionTextView = view.findViewById(R.id.discount_description);
@@ -174,6 +177,7 @@ public class ManageFragment extends BaseFragment {
         mAddressTextView.setText(data.address);
         mContactTextView.setText(data.contact);
         mWebsiteTextView.setText(data.website);
+        mCategoryChip.setText(data.category.getValue());
         mDescriptionTextView.setText(data.description);
         if (data.image != null) {
             mImagePreviewImageView.setVisibility(View.VISIBLE);

@@ -16,6 +16,7 @@ public class MerchantEntity {
     public String website;
     public String image;
     public String description;
+    public String category;
 
     @ColumnInfo(name = "opening_hour")
     public int opening;

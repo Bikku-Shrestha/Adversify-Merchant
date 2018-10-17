@@ -6,6 +6,8 @@ import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
@@ -16,6 +18,7 @@ public class PayloadHandler extends PayloadCallback {
 
     private final SimpleArrayMap<Long, Payload> incomingPayloads = new SimpleArrayMap<>();
     private final SimpleArrayMap<Long, Payload> outgoingPayloads = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Long, PayloadData> filePayloads = new SimpleArrayMap<>();
     private com.nepal.adversify.domain.callback.PayloadCallback payloadCallback;
 
     @Inject
@@ -28,6 +31,9 @@ public class PayloadHandler extends PayloadCallback {
         Timber.d("onPayloadReceived");
         if (payload.getType() == Payload.Type.BYTES) {
             PayloadData payloadData = (PayloadData) SerializationUtils.deSerializeFromByteArray(payload.asBytes());
+            if (payloadData.hasFile) {
+                filePayloads.put(payloadData.fileId, payloadData);
+            }
             payloadCallback.onClientDataReceived(endpointId, payload.getId(), payloadData);
         } else
             incomingPayloads.put(payload.getId(), payload);
@@ -37,12 +43,20 @@ public class PayloadHandler extends PayloadCallback {
     public void onPayloadTransferUpdate(@NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
         long payloadId = update.getPayloadId();
         if (incomingPayloads.containsKey(payloadId)) {
-            Payload payload = incomingPayloads.remove(payloadId);
+            Payload payload = incomingPayloads.get(payloadId);
             switch (payload.getType()) {
                 case Payload.Type.FILE:
+                    if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
+                        incomingPayloads.remove(payloadId);
+                        Timber.d("FIle payload received");
+                        PayloadData filePayloadData = filePayloads.remove(payload.getId());
+                        File payloadFile = payload.asFile().asJavaFile();
+                        payloadFile.renameTo(new File(payloadFile.getParentFile(), filePayloadData.fileName));
+                        filePayloadData.fileName = payloadFile.getAbsolutePath();
+                        payloadCallback.onClientDataReceived(endpointId, payload.getId(), filePayloadData);
+                    }
                     break;
                 case Payload.Type.STREAM:
-
                     break;
             }
         } else if (outgoingPayloads.containsKey(payloadId)) {

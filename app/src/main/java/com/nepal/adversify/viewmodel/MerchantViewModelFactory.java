@@ -17,23 +17,27 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import io.reactivex.disposables.CompositeDisposable;
 
 public class MerchantViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application mApplication;
     private final MerchantRepository mMerchantRepository;
+    private CompositeDisposable mDisposable;
 
     @Inject
-    public MerchantViewModelFactory(Application application, MerchantRepository mMerchantRepository) {
+    public MerchantViewModelFactory(Application application, MerchantRepository mMerchantRepository,
+                                    CompositeDisposable mDisposable) {
         this.mApplication = application;
         this.mMerchantRepository = mMerchantRepository;
+        this.mDisposable = mDisposable;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MerchantViewModel.class)) {
-            return (T) new MerchantViewModel(mApplication, mMerchantRepository);
+            return (T) new MerchantViewModel(mApplication, mMerchantRepository, mDisposable);
         }
         throw new IllegalArgumentException("Wrong ViewModel class");
     }

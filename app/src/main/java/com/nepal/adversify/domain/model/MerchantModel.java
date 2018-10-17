@@ -2,6 +2,7 @@ package com.nepal.adversify.domain.model;
 
 import android.net.Uri;
 
+import com.generic.appbase.domain.dto.Category;
 import com.generic.appbase.domain.dto.Location;
 
 public class MerchantModel {
@@ -11,6 +12,7 @@ public class MerchantModel {
     public String address;
     public String contact;
     public String website;
+    public Category category;
     public Uri image;
     public String description;
 

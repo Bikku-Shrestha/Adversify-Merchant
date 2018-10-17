@@ -6,9 +6,9 @@ public class DetailMerchantInfo extends PreviewMerchantInfo implements Serializa
 
     public String description;
     public String website;
-    public DiscountInfo discountInfo = new DiscountInfo();
-    public SpecialOfferInfo specialOfferInfo = new SpecialOfferInfo();
-    public OpeningInfo openingInfo = new OpeningInfo();
-    public Location location = new Location();
+    public DiscountInfo discountInfo;
+    public SpecialOfferInfo specialOfferInfo;
+    public OpeningInfo openingInfo;
+    public Location location;
 
 }
