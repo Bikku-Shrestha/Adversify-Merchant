@@ -25,7 +25,10 @@ public interface MerchantDAO {
             + "LEFT JOIN discount d ON d.id = m.discount "
             + "LEFT JOIN offer o ON o.id = m.offer "
             + "WHERE m.id = 1")
-    LiveData<CompositeMerchantEntity> get();
+    LiveData<CompositeMerchantEntity> getCombined();
+
+    @Query("SELECT * FROM merchant limit 1")
+    LiveData<MerchantEntity> get();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(MerchantEntity merchantEntity);

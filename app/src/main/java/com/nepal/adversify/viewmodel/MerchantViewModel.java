@@ -1,18 +1,26 @@
 package com.nepal.adversify.viewmodel;
 
 import android.app.Application;
-import android.net.Uri;
 
 import com.generic.appbase.domain.dto.DetailMerchantInfo;
 import com.generic.appbase.domain.dto.DiscountInfo;
 import com.generic.appbase.domain.dto.OpeningInfo;
 import com.generic.appbase.domain.dto.PayloadData;
 import com.generic.appbase.domain.dto.PreviewMerchantInfo;
+import com.generic.appbase.domain.dto.ReviewInfo;
 import com.generic.appbase.domain.dto.SpecialOfferInfo;
 import com.generic.appbase.ui.BaseViewModel;
 import com.generic.appbase.utils.FileUtils;
 import com.nepal.adversify.data.repository.MerchantRepository;
+import com.nepal.adversify.domain.model.DiscountModel;
+import com.nepal.adversify.domain.model.LocationModel;
 import com.nepal.adversify.domain.model.MerchantModel;
+import com.nepal.adversify.domain.model.OfferModel;
+import com.nepal.adversify.domain.model.OpeningModel;
+import com.nepal.adversify.domain.model.ReviewModel;
+
+import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -21,15 +29,50 @@ import androidx.lifecycle.Transformations;
 import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import timber.log.Timber;
 
 public class MerchantViewModel extends BaseViewModel {
 
-    final private MutableLiveData<Request> request = new MutableLiveData<>();
-    private final MutableLiveData<Uri> selectedImage = new MutableLiveData<>();
+    final private MutableLiveData<Request> combinedMerchantRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> merchantRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> discountRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> offerRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> openingRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> locationRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> reviewRequest = new MutableLiveData<>();
+    final private MutableLiveData<Request> averageRatingRequest = new MutableLiveData<>();
     private MerchantRepository mMerchantRepository;
     private final CompositeDisposable mDisposable;
-    private final LiveData<MerchantModel> merchantMutableLiveData = Transformations.switchMap(request,
-            input -> mMerchantRepository.loadMerchantData()
+    private final LiveData<MerchantModel> combinedMerchantLiveData = Transformations.switchMap(combinedMerchantRequest,
+            input -> mMerchantRepository.loadCombinedMerchantInfo()
+    );
+
+    private final LiveData<MerchantModel> merchantLiveData = Transformations.switchMap(merchantRequest,
+            input -> mMerchantRepository.loadCombinedMerchantInfo()
+    );
+
+    private final LiveData<Integer> averageRatingLiveData = Transformations.switchMap(averageRatingRequest,
+            input -> mMerchantRepository.loadAverageRating()
+    );
+
+    private final LiveData<DiscountModel> discountLiveData = Transformations.switchMap(discountRequest,
+            input -> mMerchantRepository.loadDiscountData()
+    );
+
+    private final LiveData<OfferModel> offerLiveData = Transformations.switchMap(offerRequest,
+            input -> mMerchantRepository.loadOfferData()
+    );
+
+    private final LiveData<OpeningModel> openingLiveData = Transformations.switchMap(openingRequest,
+            input -> mMerchantRepository.loadOpeningData()
+    );
+
+    private final LiveData<LocationModel> locationLiveData = Transformations.switchMap(locationRequest,
+            input -> mMerchantRepository.loadLocationData()
+    );
+
+    private final LiveData<List<ReviewModel>> reviewsLiveData = Transformations.switchMap(reviewRequest,
+            input -> mMerchantRepository.loadReviewData()
     );
 
     public MerchantViewModel(@NonNull Application application,
@@ -41,16 +84,39 @@ public class MerchantViewModel extends BaseViewModel {
     }
 
     public void loadMerchantData() {
-        if (merchantMutableLiveData.getValue() == null)
-            request.setValue(new Request());
+        if (merchantLiveData.getValue() == null)
+            merchantRequest.setValue(new Request());
     }
 
-    public LiveData<MerchantModel> getMerchantLiveData() {
-        return merchantMutableLiveData;
+    public void loadCombinedMerchantData() {
+        if (combinedMerchantLiveData.getValue() == null)
+            combinedMerchantRequest.setValue(new Request());
     }
 
-    public MutableLiveData<Uri> getSelectedImage() {
-        return selectedImage;
+    public void loadDiscountData() {
+        if (discountLiveData.getValue() == null)
+            discountRequest.setValue(new Request());
+    }
+
+    public void loadOfferData() {
+        if (offerLiveData.getValue() == null)
+            offerRequest.setValue(new Request());
+    }
+
+    public void loadOpeningData() {
+        if (openingLiveData.getValue() == null)
+            openingRequest.setValue(new Request());
+    }
+
+
+    public void loadAverageRatingData() {
+        if (averageRatingLiveData.getValue() == null)
+            averageRatingRequest.setValue(new Request());
+    }
+
+    public void loadReviewData() {
+        if (reviewsLiveData.getValue() == null)
+            reviewRequest.setValue(new Request());
     }
 
     public void updateData(MerchantModel merchantModel, CompletableObserver observer) {
@@ -85,14 +151,17 @@ public class MerchantViewModel extends BaseViewModel {
     }
 
     public PreviewMerchantInfo getPreviewMerchantData() {
-        MerchantModel merchantModel = merchantMutableLiveData.getValue();
+        MerchantModel merchantModel = combinedMerchantLiveData.getValue();
         PreviewMerchantInfo merchantInfo = new PreviewMerchantInfo();
-        merchantInfo.title = merchantModel.title;
+        merchantInfo.title = Objects.requireNonNull(merchantModel).title;
         merchantInfo.address = merchantModel.address;
         merchantInfo.contact = merchantModel.contact;
-        if (merchantModel.discountModel != null)
+        merchantInfo.rating = averageRatingLiveData.getValue() == null ? 0 : averageRatingLiveData.getValue();
+        if (merchantModel.hasDiscount) {
+            Timber.d("has discount");
             merchantInfo.discount = merchantModel.discountModel.title;
-        if (merchantModel.offerModel != null)
+        }
+        if (merchantModel.hasOffer)
             merchantInfo.specialOffer = merchantModel.offerModel.title;
         if (merchantModel.image != null) {
             merchantInfo.fileName = FileUtils.getExtensionWithName(getApplication(), merchantModel.image);
@@ -107,19 +176,20 @@ public class MerchantViewModel extends BaseViewModel {
     }
 
     public DetailMerchantInfo getDetailMerchantInfo() {
-        MerchantModel merchantModel = merchantMutableLiveData.getValue();
+        MerchantModel merchantModel = combinedMerchantLiveData.getValue();
         DetailMerchantInfo merchantInfo = new DetailMerchantInfo();
-        merchantInfo.title = merchantModel.title;
+        merchantInfo.title = Objects.requireNonNull(merchantModel).title;
         merchantInfo.address = merchantModel.address;
         merchantInfo.contact = merchantModel.contact;
         merchantInfo.website = merchantModel.website;
         merchantInfo.description = merchantModel.description;
-        if (merchantModel.discountModel != null) {
+        merchantInfo.rating = averageRatingLiveData.getValue() == null ? 0 : averageRatingLiveData.getValue();
+        if (merchantModel.hasDiscount) {
             merchantInfo.discountInfo = new DiscountInfo();
             merchantInfo.discountInfo.title = merchantModel.discountModel.title;
             merchantInfo.discountInfo.description = merchantModel.discountModel.description;
         }
-        if (merchantModel.offerModel != null) {
+        if (merchantModel.hasOffer) {
             merchantInfo.specialOfferInfo = new SpecialOfferInfo();
             merchantInfo.specialOfferInfo.title = merchantModel.offerModel.title;
             merchantInfo.specialOfferInfo.description = merchantModel.offerModel.description;
@@ -143,9 +213,70 @@ public class MerchantViewModel extends BaseViewModel {
         } else {
             merchantInfo.hasFile = false;
         }
+
+        List<ReviewModel> reviewModelList = reviewsLiveData.getValue();
+        if (reviewModelList != null) {
+            ReviewModel[] reviewModels = reviewModelList.toArray(new ReviewModel[0]);
+            ReviewInfo[] reviewInfos = new ReviewInfo[reviewModels.length];
+            for (int i = 0; i < reviewModels.length; i++) {
+                ReviewModel reviewModel = reviewModels[i];
+                ReviewInfo reviewInfo = new ReviewInfo();
+                reviewInfo.clientId = reviewModel.clientId;
+                reviewInfo.clientName = reviewModel.clientName;
+                reviewInfo.star = reviewModel.star;
+                reviewInfo.content = reviewModel.review;
+                reviewInfos[i] = reviewInfo;
+            }
+
+            merchantInfo.reviewInfos = reviewInfos;
+        }
+
         merchantInfo.dataType = PayloadData.MERCHANT_DETAIL_INFO;
 
         return merchantInfo;
+    }
+
+    public void updateAverageRating(Integer data) {
+        MerchantModel merchantModel = combinedMerchantLiveData.getValue();
+        if (merchantModel != null) {
+            merchantModel.rating = data;
+        }
+    }
+
+    public void addReviewData(ReviewModel reviewModel) {
+        mMerchantRepository.addReviewData(reviewModel);
+    }
+
+    public LiveData<Integer> getAverageRatingLiveData() {
+        return averageRatingLiveData;
+    }
+
+    public LiveData<DiscountModel> getDiscountLiveData() {
+        return discountLiveData;
+    }
+
+    public LiveData<OfferModel> getOfferLiveData() {
+        return offerLiveData;
+    }
+
+    public LiveData<OpeningModel> getOpeningLiveData() {
+        return openingLiveData;
+    }
+
+    public LiveData<LocationModel> getLocationLiveData() {
+        return locationLiveData;
+    }
+
+    public LiveData<List<ReviewModel>> getReviewsLiveData() {
+        return reviewsLiveData;
+    }
+
+    public LiveData<MerchantModel> getCombinedMerchantLiveData() {
+        return combinedMerchantLiveData;
+    }
+
+    public LiveData<MerchantModel> getMerchantLiveData() {
+        return merchantLiveData;
     }
 
 

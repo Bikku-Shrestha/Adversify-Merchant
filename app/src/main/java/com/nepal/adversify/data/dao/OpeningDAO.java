@@ -2,6 +2,7 @@ package com.nepal.adversify.data.dao;
 
 import com.nepal.adversify.data.entity.OpeningEntity;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -13,7 +14,7 @@ import androidx.room.Update;
 public interface OpeningDAO {
 
     @Query("SELECT * FROM opening_info LIMIT 1")
-    OpeningEntity get();
+    LiveData<OpeningEntity> get();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(OpeningEntity openingEntity);

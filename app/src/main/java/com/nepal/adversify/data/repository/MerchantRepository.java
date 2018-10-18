@@ -12,15 +12,29 @@ import com.nepal.adversify.data.dao.LocationDAO;
 import com.nepal.adversify.data.dao.MerchantDAO;
 import com.nepal.adversify.data.dao.OfferDAO;
 import com.nepal.adversify.data.dao.OpeningDAO;
+import com.nepal.adversify.data.dao.RateDAO;
+import com.nepal.adversify.data.dao.ReviewDAO;
 import com.nepal.adversify.data.entity.DiscountEntity;
 import com.nepal.adversify.data.entity.LocationEntity;
 import com.nepal.adversify.data.entity.MerchantEntity;
 import com.nepal.adversify.data.entity.OpeningEntity;
+import com.nepal.adversify.data.entity.ReviewEntity;
 import com.nepal.adversify.data.entity.SpecialOfferEntity;
 import com.nepal.adversify.domain.model.DiscountModel;
+import com.nepal.adversify.domain.model.LocationModel;
 import com.nepal.adversify.domain.model.MerchantModel;
 import com.nepal.adversify.domain.model.OfferModel;
 import com.nepal.adversify.domain.model.OpeningModel;
+import com.nepal.adversify.domain.model.ReviewModel;
+import com.nepal.adversify.mapper.DiscountEntityToDiscountModelMapper;
+import com.nepal.adversify.mapper.LocationEntityToLocationModelMapper;
+import com.nepal.adversify.mapper.MerchantEntityToMerchantModelMapper;
+import com.nepal.adversify.mapper.OfferEntityToOfferModelMapper;
+import com.nepal.adversify.mapper.OpeningEntityToOpeningModelMapper;
+import com.nepal.adversify.mapper.ReviewEntityToReviewModelMapper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -39,32 +53,97 @@ public class MerchantRepository {
     private final DiscountDAO mDiscountDAO;
     private final OfferDAO mOfferDAO;
     private final LocationDAO mLocationDAO;
+    private final ReviewDAO mReviewDAO;
+    private final RateDAO mRateDAO;
     private final SchedulerProvider mScheduler;
     private CompositeDisposable mDisposable;
+    private MerchantEntityToMerchantModelMapper fromMerchantEntityToMerchantModelMapper;
+    private DiscountEntityToDiscountModelMapper fromDiscountEntityToDiscountModelMapper;
+    private OfferEntityToOfferModelMapper fromOfferEntityToOfferModelMapper;
+    private LocationEntityToLocationModelMapper fromLocationEntityToLocationModelMapper;
+    private OpeningEntityToOpeningModelMapper fromOpeningEntityToOpeningModelMapper;
+    private ReviewEntityToReviewModelMapper fromReviewEntityToReviewModelMapper;
 
     @Inject
     public MerchantRepository(MerchantDAO merchantDAO, OpeningDAO mOpeningDAO,
                               DiscountDAO mDiscountDAO, OfferDAO mOfferDAO,
-                              LocationDAO mLocationDAO, SchedulerProvider mScheduler,
-                              CompositeDisposable mDisposable) {
+                              LocationDAO mLocationDAO, ReviewDAO mReviewDAO,
+                              RateDAO mRateDAO, SchedulerProvider mScheduler,
+                              CompositeDisposable mDisposable,
+                              MerchantEntityToMerchantModelMapper fromMerchantEntityToMerchantModelMapper,
+                              DiscountEntityToDiscountModelMapper fromDiscountEntityToDiscountModelMapper,
+                              OfferEntityToOfferModelMapper fromOfferEntityToOfferModelMapper,
+                              LocationEntityToLocationModelMapper fromLocationEntityToLocationModelMapper,
+                              OpeningEntityToOpeningModelMapper fromOpeningEntityToOpeningModelMapper,
+                              ReviewEntityToReviewModelMapper fromReviewEntityToReviewModelMapper
+    ) {
         this.mMerchantDAO = merchantDAO;
         this.mOpeningDAO = mOpeningDAO;
         this.mDiscountDAO = mDiscountDAO;
         this.mOfferDAO = mOfferDAO;
         this.mLocationDAO = mLocationDAO;
+        this.mReviewDAO = mReviewDAO;
+        this.mRateDAO = mRateDAO;
         this.mScheduler = mScheduler;
         this.mDisposable = mDisposable;
+        this.fromMerchantEntityToMerchantModelMapper = fromMerchantEntityToMerchantModelMapper;
+        this.fromDiscountEntityToDiscountModelMapper = fromDiscountEntityToDiscountModelMapper;
+        this.fromOfferEntityToOfferModelMapper = fromOfferEntityToOfferModelMapper;
+        this.fromLocationEntityToLocationModelMapper = fromLocationEntityToLocationModelMapper;
+        this.fromOpeningEntityToOpeningModelMapper = fromOpeningEntityToOpeningModelMapper;
+        this.fromReviewEntityToReviewModelMapper = fromReviewEntityToReviewModelMapper;
         Timber.d("Initialised!");
     }
 
     public LiveData<MerchantModel> loadMerchantData() {
-        Timber.d("Load mercahnt data");
-        return Transformations.map(mMerchantDAO.get(), input -> {
-            if (input == null) {
-                Timber.d("empty database");
-                return null;
+        Timber.d("loadMerchantData");
+        return Transformations.map(mMerchantDAO.get(), input -> fromMerchantEntityToMerchantModelMapper.from(input));
+    }
+
+    public LiveData<DiscountModel> loadDiscountData() {
+        Timber.d("loadDiscountData");
+        return Transformations.map(mDiscountDAO.get(), input -> fromDiscountEntityToDiscountModelMapper.from(input));
+    }
+
+    public LiveData<OfferModel> loadOfferData() {
+        Timber.d("loadOfferData");
+        return Transformations.map(mOfferDAO.get(), input -> fromOfferEntityToOfferModelMapper.from(input));
+    }
+
+    public LiveData<OpeningModel> loadOpeningData() {
+        Timber.d("loadOpeningData");
+        return Transformations.map(mOpeningDAO.get(), input -> fromOpeningEntityToOpeningModelMapper.from(input));
+    }
+
+    public LiveData<LocationModel> loadLocationData() {
+        Timber.d("loadLocationData");
+        return Transformations.map(mLocationDAO.get(), input -> fromLocationEntityToLocationModelMapper.from(input));
+    }
+
+    public LiveData<Integer> loadAverageRating() {
+        Timber.d("loadAverageRating");
+        return mReviewDAO.getAverageRating();
+    }
+
+    public LiveData<List<ReviewModel>> loadReviewData() {
+        Timber.d("loadReviewData");
+        return Transformations.map(mReviewDAO.get(), input -> {
+            List<ReviewModel> reviewModels = new ArrayList<>();
+            for (ReviewEntity entity : input) {
+                reviewModels.add(fromReviewEntityToReviewModelMapper.from(entity));
             }
+
+            return reviewModels;
+        });
+    }
+
+    public LiveData<MerchantModel> loadCombinedMerchantInfo() {
+        return Transformations.map(mMerchantDAO.getCombined(), input -> {
+
+            if (input == null) return null;
+
             MerchantModel model = new MerchantModel();
+
             model.id = input.id;
             model.title = input.title;
             model.address = input.address;
@@ -75,10 +154,14 @@ public class MerchantRepository {
             model.image = TextUtils.isEmpty(input.image) ? null : Uri.parse(input.image);
 
             if (input.discountId != 1) {
+                Timber.d("discount available in database with id:%d", input.discountId);
                 model.discountModel = new DiscountModel();
                 model.discountModel.id = input.discountId;
                 model.discountModel.title = input.discountTitle;
                 model.discountModel.description = input.discountDescription;
+                model.hasDiscount = true;
+            } else {
+                model.hasDiscount = false;
             }
 
             if (input.offerId != 1) {
@@ -86,6 +169,9 @@ public class MerchantRepository {
                 model.offerModel.id = input.offerId;
                 model.offerModel.title = input.offerTitle;
                 model.offerModel.description = input.offerDescription;
+                model.hasOffer = true;
+            } else {
+                model.hasOffer = false;
             }
 
             if (input.openingId != 1) {
@@ -221,4 +307,28 @@ public class MerchantRepository {
     public void onCleared() {
         mDisposable.dispose();
     }
+
+    public void addReviewData(ReviewModel reviewModel) {
+        Completable.fromAction(() -> {
+            mReviewDAO.insert(fromReviewEntityToReviewModelMapper.to(reviewModel));
+        }).subscribeOn(mScheduler.io())
+                .observeOn(mScheduler.ui())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Timber.d("Review added to database");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.e(e, "Error adding review");
+                    }
+                });
+    }
+
 }

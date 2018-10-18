@@ -9,6 +9,7 @@ public class DetailMerchantInfo extends PreviewMerchantInfo implements Serializa
     public DiscountInfo discountInfo;
     public SpecialOfferInfo specialOfferInfo;
     public OpeningInfo openingInfo;
+    public ReviewInfo[] reviewInfos;
     public Location location;
 
 }

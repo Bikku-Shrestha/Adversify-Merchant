@@ -35,6 +35,7 @@ public final class HomeViewModel extends BaseViewModel {
         }
     }
 
+
     public MutableLiveData<TreeMap<String, ClientModel>> getConnectedClient() {
         return connectedClientLiveData;
     }
@@ -43,4 +44,9 @@ public final class HomeViewModel extends BaseViewModel {
         return statusLiveData;
     }
 
+    @Override
+    protected void onCleared() {
+        statusLiveData.setValue(null);
+        super.onCleared();
+    }
 }

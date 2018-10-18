@@ -10,7 +10,6 @@ import android.view.View;
 
 import com.ahamed.multiviewadapter.SimpleRecyclerAdapter;
 import com.generic.appbase.domain.event.OnItemClickCallback;
-import com.generic.appbase.manager.GPSLocationManager;
 import com.generic.appbase.ui.BaseFragment;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -21,8 +20,12 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.nepal.adversify.R;
 import com.nepal.adversify.domain.binder.ConnectedClientBinder;
+import com.nepal.adversify.domain.binder.ReviewBinder;
 import com.nepal.adversify.domain.model.ClientModel;
+import com.nepal.adversify.domain.model.MerchantModel;
+import com.nepal.adversify.domain.model.ReviewModel;
 import com.nepal.adversify.manager.AdvertiseManager;
+import com.nepal.adversify.mapper.ReviewInfoToReviewModelMapper;
 import com.nepal.adversify.viewmodel.HomeViewModel;
 import com.nepal.adversify.viewmodel.HomeViewModelFactory;
 import com.nepal.adversify.viewmodel.MerchantViewModel;
@@ -38,6 +41,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
@@ -59,14 +63,20 @@ public class HomeFragment extends BaseFragment implements
     @Inject
     ConnectedClientBinder mBinder;
     @Inject
+    ReviewBinder mReviewBinder;
+    @Inject
     ConnectionsClient mConnectionsClient;
+    @Inject
+    ReviewInfoToReviewModelMapper reviewInfoToReviewModelMapper;
 
     private AdvertiseManager mAdvertiseManager;
     private HomeViewModel mHomeViewModel;
     private MerchantViewModel mMerchantViewModel;
     private SimpleRecyclerAdapter<ClientModel, ConnectedClientBinder> mConnectedAdapter;
+    private SimpleRecyclerAdapter<ReviewModel, ReviewBinder> mReviewAdapter;
 
     private FloatingActionButton mAdvertiseFloatingActionButton;
+    private View mContentView;
 
     private boolean isMerchantInfoAvailable = false;
     private boolean isPermissionGranted = false;
@@ -75,6 +85,28 @@ public class HomeFragment extends BaseFragment implements
         // Required empty public constructor
     }
 
+    private Observer<MerchantModel> merchantModelObserver = data -> {
+        if (data == null) {
+            isMerchantInfoAvailable = false;
+        } else {
+            isMerchantInfoAvailable = true;
+            Timber.d("Merchant title: %s", data.title);
+        }
+    };
+    private Observer<Integer> averageRatingObserver = data -> {
+        if (data != null) {
+            Timber.d("Average rating: %d", data);
+            mMerchantViewModel.updateAverageRating(data);
+        }
+    };
+    private Observer<List<ReviewModel>> reviewsObserver = data -> {
+        if (data != null) {
+            Timber.d("Total Reviews: %d", data.size());
+            mReviewAdapter.setData(data);
+            mContentView.invalidate();
+        }
+    };
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -82,78 +114,9 @@ public class HomeFragment extends BaseFragment implements
         mMerchantViewModel = ViewModelProviders.of(getActivity(), merchantViewModelFactory).get(MerchantViewModel.class);
         mHomeViewModel = ViewModelProviders.of(getActivity(), mHomeViewModelFactory).get(HomeViewModel.class);
         mAdvertiseManager = new AdvertiseManager(getContext(), mHomeViewModel, mConnectionsClient,
-                mMerchantViewModel);
+                mMerchantViewModel, reviewInfoToReviewModelMapper);
         observeData();
         loadData();
-    }
-
-    @Override
-    protected View onViewReady(View view, Bundle savedInstanceState) {
-        Timber.d("onViewReady");
-
-        Toolbar mToolbar = view.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
-        NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
-
-        mAdvertiseFloatingActionButton = view.findViewById(R.id.discoverButton);
-        FloatingActionButton mManageFloatingActionButton = view.findViewById(R.id.manageButton);
-        mManageFloatingActionButton.setOnClickListener((v) -> {
-            Timber.d("Manage button clicked");
-            NavOptions navOptions = new NavOptions.Builder()
-                    .setEnterAnim(R.anim.enter_from_right)
-                    .setExitAnim(R.anim.exit_to_left)
-                    .setPopEnterAnim(R.anim.enter_from_left)
-                    .setPopExitAnim(R.anim.exit_to_right)
-                    .build();
-
-            Navigation.findNavController(v).navigate(R.id.manageFragment, null, navOptions);
-        });
-
-        mAdvertiseFloatingActionButton.setOnClickListener((v) -> {
-            Timber.d("Broadcast button clicked");
-            if (isPermissionGranted && isMerchantInfoAvailable) {
-                mAdvertiseFloatingActionButton.setEnabled(false);
-                mAdvertiseManager.startAdvertising();
-            } else {
-                showToast("First update information before advertising.");
-            }
-        });
-
-        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setHasFixedSize(true);
-        mConnectedAdapter = new SimpleRecyclerAdapter<>(mBinder);
-        mRecyclerView.setAdapter(mConnectedAdapter);
-
-        return view;
-    }
-
-    private void observeData() {
-        Timber.d("Observing livedata");
-
-        mMerchantViewModel.getMerchantLiveData().observe(this, data -> {
-            if (data == null) {
-                isMerchantInfoAvailable = false;
-            } else {
-                isMerchantInfoAvailable = true;
-                Timber.d("Merchant title: %s", data.title);
-            }
-        });
-
-        mHomeViewModel.getConnectedClient().observe(this, data -> {
-            Timber.d("Total connected clients: %d", data.size());
-            mConnectedAdapter.setData(new ArrayList<>(data.values()));
-        });
-
-        mHomeViewModel.getStatusLiveData().observe(this, data -> {
-            Timber.d(data);
-            showToast(data);
-        });
-    }
-
-    private void loadData() {
-        Timber.d("loadData");
-        mMerchantViewModel.loadMerchantData();
     }
 
     private void requestPermission() {
@@ -171,7 +134,6 @@ public class HomeFragment extends BaseFragment implements
                         if (report.areAllPermissionsGranted()) {
                             Timber.d("onPermissionGranted");
                             isPermissionGranted = true;
-                            fetchLocation();
                         }
 
                         if (report.isAnyPermissionPermanentlyDenied()) {
@@ -187,12 +149,6 @@ public class HomeFragment extends BaseFragment implements
                 .check();
     }
 
-    private void fetchLocation() {
-        Timber.d("fetchLocation");
-        GPSLocationManager.getLocation(getContext(), location -> {
-            mMerchantViewModel.updateLocation(location.getLatitude(), location.getLongitude());
-        });
-    }
 
     /**
      * Showing Alert Dialog with Settings option
@@ -241,4 +197,83 @@ public class HomeFragment extends BaseFragment implements
         mAdvertiseManager.stopAdvertising();
         super.onDestroy();
     }
+
+    @Override
+    protected View onViewReady(View view, Bundle savedInstanceState) {
+        Timber.d("onViewReady");
+
+        Toolbar mToolbar = view.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
+
+        mAdvertiseFloatingActionButton = view.findViewById(R.id.discoverButton);
+        mContentView = view.findViewById(R.id.content_container);
+        FloatingActionButton mManageFloatingActionButton = view.findViewById(R.id.manageButton);
+        mManageFloatingActionButton.setOnClickListener((v) -> {
+            Timber.d("Manage button clicked");
+            NavOptions navOptions = new NavOptions.Builder()
+                    .setEnterAnim(R.anim.enter_from_right)
+                    .setExitAnim(R.anim.exit_to_left)
+                    .setPopEnterAnim(R.anim.enter_from_left)
+                    .setPopExitAnim(R.anim.exit_to_right)
+                    .build();
+
+            Navigation.findNavController(v).navigate(R.id.manageFragment, null, navOptions);
+        });
+
+        mAdvertiseFloatingActionButton.setOnClickListener((v) -> {
+            Timber.d("Broadcast button clicked");
+            if (isPermissionGranted && isMerchantInfoAvailable) {
+                mAdvertiseFloatingActionButton.setEnabled(false);
+                mAdvertiseManager.startAdvertising();
+            } else {
+                showToast("First update information before advertising.");
+            }
+        });
+
+        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setHasFixedSize(true);
+        mConnectedAdapter = new SimpleRecyclerAdapter<>(mBinder);
+        mRecyclerView.setAdapter(mConnectedAdapter);
+
+        RecyclerView mReviewRecyclerView = view.findViewById(R.id.review_recycler_view);
+        mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mReviewAdapter = new SimpleRecyclerAdapter<>(mReviewBinder);
+        mReviewRecyclerView.setAdapter(mReviewAdapter);
+
+        return view;
+    }
+
+    private void observeData() {
+        Timber.d("Observing livedata");
+
+        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, merchantModelObserver);
+
+        mMerchantViewModel.getReviewsLiveData().observe(this, reviewsObserver);
+
+        mHomeViewModel.getConnectedClient().observe(this, data -> {
+            Timber.d("Total connected clients: %d", data.size());
+            mConnectedAdapter.setData(new ArrayList<>(data.values()));
+
+        });
+
+        mHomeViewModel.getStatusLiveData().observe(this, data -> {
+            if (data != null) {
+                Timber.d(data);
+                showToast(data);
+            }
+        });
+
+        mMerchantViewModel.getAverageRatingLiveData().observe(this, averageRatingObserver);
+    }
+
+    private void loadData() {
+        Timber.d("loadData");
+        mMerchantViewModel.loadAverageRatingData();
+        mMerchantViewModel.loadReviewData();
+        mMerchantViewModel.loadCombinedMerchantData();
+    }
+
+
 }

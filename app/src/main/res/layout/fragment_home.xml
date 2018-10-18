@@ -14,45 +14,51 @@
         <include layout="@layout/layout_toolbar" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
+        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/activity_horizontal_margin"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <TextView
-            android:id="@+id/connected_clients"
             style="@style/AppTheme.Text.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title_connected_clients"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             tools:text="Connected Clients" />
 
-        <View
-            android:id="@+id/highlight_1"
-            android:layout_width="@dimen/space5x"
-            android:layout_height="@dimen/four_dp"
-            android:layout_marginTop="@dimen/two_dp"
-            android:background="@color/colorAccent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/connected_clients" />
+        <include layout="@layout/view_highlight_1" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/space"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/highlight_1"
-            tools:itemlist="@layout/item_connected_client">
+            android:layout_weight="1"
+            tools:listitem="@layout/item_connected_client">
 
         </androidx.recyclerview.widget.RecyclerView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            style="@style/AppTheme.Text.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space"
+            android:text="@string/title_latest_reviews"
+            tools:text="Latest Reviews" />
+
+        <include layout="@layout/view_highlight_1" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/review_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/space"
+            android:layout_weight="1"
+            tools:listitem="@layout/item_review" />
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/discoverButton"
@@ -75,6 +81,5 @@
         app:layout_anchorGravity="top|center_horizontal"
         app:srcCompat="@drawable/ic_edit_black_24dp"
         app:tint="@color/white" />
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

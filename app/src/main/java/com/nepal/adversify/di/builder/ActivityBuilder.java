@@ -29,6 +29,7 @@ import com.nepal.adversify.ui.MainActivity;
 import com.nepal.adversify.ui.home.HomeBinderModule;
 import com.nepal.adversify.ui.home.HomeFragment;
 import com.nepal.adversify.ui.manage.ManageFragment;
+import com.nepal.adversify.ui.manage.MerchantBinderModule;
 import com.nepal.adversify.ui.manage.MerchantProviderModule;
 import com.nepal.adversify.ui.manage.UpdateFragment;
 
@@ -38,13 +39,13 @@ import dagger.android.ContributesAndroidInjector;
 @Module
 public abstract class ActivityBuilder {
 
-    @ContributesAndroidInjector(modules = {MerchantProviderModule.class, BaseRXModule.class})
+    @ContributesAndroidInjector(modules = {MerchantProviderModule.class, MerchantBinderModule.class, BaseRXModule.class})
     abstract UpdateFragment bindUpdateFragment();
 
-    @ContributesAndroidInjector(modules = {MerchantProviderModule.class, BaseRXModule.class})
+    @ContributesAndroidInjector(modules = {MerchantProviderModule.class, MerchantBinderModule.class, BaseRXModule.class})
     abstract ManageFragment bindManageFragment();
 
-    @ContributesAndroidInjector(modules = {HomeBinderModule.class, MerchantProviderModule.class, BaseRXModule.class})
+    @ContributesAndroidInjector(modules = {HomeBinderModule.class, MerchantBinderModule.class, MerchantProviderModule.class, BaseRXModule.class})
     abstract HomeFragment bindHomeFragment();
 
     @ContributesAndroidInjector()

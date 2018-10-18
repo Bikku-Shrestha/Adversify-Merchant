@@ -41,6 +41,7 @@ ext {
     roomDatabase = '2.1.0-alpha01'
     navigationVersion = '1.0.0-alpha06'
     nearbyVersion = '16.0.0'
+    locationVersion = '16.0.0'
     gmailAuthVersion = '16.0.1'
 
     dagger2Version = '2.15'

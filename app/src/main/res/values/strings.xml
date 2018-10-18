@@ -37,4 +37,5 @@
     <string name="title_update">Update Merchant Info</string>
     <string name="title_category">Category</string>
     <string name="prompt_select_category">Select Category</string>
+    <string name="title_latest_reviews">Latest Reviews</string>
 </resources>

@@ -5,6 +5,8 @@ import android.net.Uri;
 import com.generic.appbase.domain.dto.Category;
 import com.generic.appbase.domain.dto.Location;
 
+import java.util.List;
+
 public class MerchantModel {
 
     public int id;
@@ -16,9 +18,14 @@ public class MerchantModel {
     public Uri image;
     public String description;
 
-    public OpeningModel openingModel;
-    public DiscountModel discountModel;
-    public OfferModel offerModel;
+    public int rating;
+
+    public boolean hasDiscount;
+    public boolean hasOffer;
+    public OpeningModel openingModel = null;
+    public DiscountModel discountModel = null;
+    public OfferModel offerModel = null;
+    public List<ReviewModel> reviewModels;
 
     public Location location;
 

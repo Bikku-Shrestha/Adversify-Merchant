@@ -47,4 +47,5 @@ public class CompositeMerchantEntity {
     public double lat;
     public double lon;
 
+
 }

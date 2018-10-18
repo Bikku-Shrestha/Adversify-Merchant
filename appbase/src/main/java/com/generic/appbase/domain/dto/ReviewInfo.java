@@ -2,7 +2,7 @@ package com.generic.appbase.domain.dto;
 
 import java.io.Serializable;
 
-public class ReviewInfo implements Serializable {
+public class ReviewInfo extends PayloadData implements Serializable {
 
     public String clientId;
     public String clientName;

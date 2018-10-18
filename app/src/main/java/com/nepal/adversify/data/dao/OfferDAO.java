@@ -2,6 +2,7 @@ package com.nepal.adversify.data.dao;
 
 import com.nepal.adversify.data.entity.SpecialOfferEntity;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -13,7 +14,7 @@ import androidx.room.Update;
 public interface OfferDAO {
 
     @Query("SELECT * FROM offer LIMIT 1")
-    SpecialOfferEntity get();
+    LiveData<SpecialOfferEntity> get();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(SpecialOfferEntity offerEntity);

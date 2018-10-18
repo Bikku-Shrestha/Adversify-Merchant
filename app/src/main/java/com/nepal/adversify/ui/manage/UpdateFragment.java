@@ -1,6 +1,7 @@
 package com.nepal.adversify.ui.manage;
 
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,8 +15,8 @@ import android.widget.ProgressBar;
 import com.bumptech.glide.Glide;
 import com.generic.appbase.domain.dto.Category;
 import com.generic.appbase.domain.dto.Location;
-import com.generic.appbase.manager.GPSLocationManager;
 import com.generic.appbase.ui.BaseFragment;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nepal.adversify.R;
@@ -25,6 +26,7 @@ import com.nepal.adversify.domain.model.OfferModel;
 import com.nepal.adversify.domain.model.OpeningModel;
 import com.nepal.adversify.viewmodel.MerchantViewModel;
 import com.nepal.adversify.viewmodel.MerchantViewModelFactory;
+import com.nepal.adversify.viewmodel.UpdateViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,8 @@ public class UpdateFragment extends BaseFragment {
 
     @Inject
     MerchantViewModelFactory merchantViewModelFactory;
+    @Inject
+    FusedLocationProviderClient mLocationProvider;
 
     //Basic information views
     private TextInputEditText mNameInputEditText;
@@ -88,6 +92,7 @@ public class UpdateFragment extends BaseFragment {
     private ProgressBar mProgressBar;
 
     private MerchantViewModel mMerchantViewModel;
+    private UpdateViewModel mUpdateViewModel;
 
     public UpdateFragment() {
         // Required empty public constructor
@@ -98,8 +103,8 @@ public class UpdateFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         mMerchantViewModel = ViewModelProviders.of(getActivity(), merchantViewModelFactory).get(MerchantViewModel.class);
+        mUpdateViewModel = ViewModelProviders.of(this).get(UpdateViewModel.class);
         observeData();
-        loadData();
     }
 
     @Override
@@ -130,7 +135,7 @@ public class UpdateFragment extends BaseFragment {
         });
         mImageClearButton.setOnClickListener((v) -> {
             Timber.d("Image clear button clicked");
-            mMerchantViewModel.getSelectedImage().setValue(null);
+            mUpdateViewModel.getSelectedImage().setValue(null);
         });
 
         mNameInputEditText = view.findViewById(R.id.input_name);
@@ -171,7 +176,7 @@ public class UpdateFragment extends BaseFragment {
     private void observeData() {
         Timber.d("Observing livedata");
 
-        mMerchantViewModel.getMerchantLiveData().observe(this, data -> {
+        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, data -> {
             if (data == null) return;
 
             fillBasicInfo(data);
@@ -184,7 +189,7 @@ public class UpdateFragment extends BaseFragment {
 
 
         });
-        mMerchantViewModel.getSelectedImage().observe(this, data -> {
+        mUpdateViewModel.getSelectedImage().observe(this, data -> {
             if (data == null) {
                 mPreviewImageView.setBackgroundDrawable(null);
                 mImageClearButton.setVisibility(View.INVISIBLE);
@@ -261,11 +266,8 @@ public class UpdateFragment extends BaseFragment {
         }
     }
 
-    private void loadData() {
-        Timber.d("loadData");
-        mMerchantViewModel.loadMerchantData();
-    }
 
+    @SuppressLint("MissingPermission")
     private void updateData(View view) {
         final String name = mNameInputEditText.getEditableText().toString().trim();
         final String address = mAddressInputEditText.getEditableText().toString().trim();
@@ -273,7 +275,7 @@ public class UpdateFragment extends BaseFragment {
         final String website = mWebsiteInputEditText.getEditableText().toString().trim();
         final String description = mDescriptionInputEditText.getEditableText().toString().trim();
         final Category category = (Category) mCategorySpinner.getSelectedItem();
-        final Uri image = mMerchantViewModel.getSelectedImage().getValue();
+        final Uri image = mUpdateViewModel.getSelectedImage().getValue();
 
         final String sunday = mSundayInputEditText.getEditableText().toString().trim();
         final String monday = mMondayInputEditText.getEditableText().toString().trim();
@@ -356,67 +358,69 @@ public class UpdateFragment extends BaseFragment {
 
         mProgressBar.setVisibility(View.VISIBLE);
         mUpdateButton.setVisibility(View.INVISIBLE);
-        GPSLocationManager.getLocation(getContext(), location -> {
+        mLocationProvider.getLastLocation()
+                .addOnSuccessListener(location -> {
 
-            MerchantModel merchantModel = new MerchantModel();
-            merchantModel.title = name;
-            merchantModel.address = address;
-            merchantModel.contact = contact;
-            merchantModel.website = website;
-            merchantModel.image = image;
-            merchantModel.category = category;
-            merchantModel.description = description;
+                    MerchantModel merchantModel = new MerchantModel();
+                    merchantModel.title = name;
+                    merchantModel.address = address;
+                    merchantModel.contact = contact;
+                    merchantModel.website = website;
+                    merchantModel.image = image;
+                    merchantModel.category = category;
+                    merchantModel.description = description;
 
-            merchantModel.openingModel = new OpeningModel();
-            merchantModel.openingModel.sunday = sunday;
-            merchantModel.openingModel.monday = monday;
-            merchantModel.openingModel.tuesday = tuesday;
-            merchantModel.openingModel.wednesday = wednesday;
-            merchantModel.openingModel.thursday = thursday;
-            merchantModel.openingModel.friday = friday;
-            merchantModel.openingModel.saturday = saturday;
+                    merchantModel.openingModel = new OpeningModel();
+                    merchantModel.openingModel.sunday = sunday;
+                    merchantModel.openingModel.monday = monday;
+                    merchantModel.openingModel.tuesday = tuesday;
+                    merchantModel.openingModel.wednesday = wednesday;
+                    merchantModel.openingModel.thursday = thursday;
+                    merchantModel.openingModel.friday = friday;
+                    merchantModel.openingModel.saturday = saturday;
 
-            if (!(TextUtils.isEmpty(discountTitle) && TextUtils.isEmpty(discountDescription))) {
-                merchantModel.discountModel = new DiscountModel();
-                merchantModel.discountModel.title = discountTitle;
-                merchantModel.discountModel.description = discountDescription;
-            }
+                    if (!(TextUtils.isEmpty(discountTitle) && TextUtils.isEmpty(discountDescription))) {
+                        merchantModel.discountModel = new DiscountModel();
+                        merchantModel.discountModel.title = discountTitle;
+                        merchantModel.discountModel.description = discountDescription;
+                    }
 
-            if (!(TextUtils.isEmpty(offerTitle) && TextUtils.isEmpty(offerDescription))) {
-                merchantModel.offerModel = new OfferModel();
-                merchantModel.offerModel.title = offerTitle;
-                merchantModel.offerModel.description = offerDescription;
-            }
+                    if (!(TextUtils.isEmpty(offerTitle) && TextUtils.isEmpty(offerDescription))) {
+                        merchantModel.offerModel = new OfferModel();
+                        merchantModel.offerModel.title = offerTitle;
+                        merchantModel.offerModel.description = offerDescription;
+                    }
 
-            merchantModel.location = new Location();
-            merchantModel.location.lat = location.getLatitude();
-            merchantModel.location.lon = location.getLongitude();
+                    merchantModel.location = new Location();
+                    merchantModel.location.lat = location.getLatitude();
+                    merchantModel.location.lon = location.getLongitude();
 
-            mMerchantViewModel.updateData(merchantModel, new CompletableObserver() {
-                @Override
-                public void onSubscribe(Disposable d) {
-                }
+                    mMerchantViewModel.updateData(merchantModel, new CompletableObserver() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                        }
 
-                @Override
-                public void onComplete() {
-                    Timber.d("Data updated on database");
-                    showToast("Updated successfully!");
-                    mProgressBar.setVisibility(View.GONE);
-                    mUpdateButton.setVisibility(View.VISIBLE);
-                    Navigation.findNavController(view).navigateUp();
-                }
+                        @Override
+                        public void onComplete() {
+                            Timber.d("Data updated on database");
+                            showToast("Updated successfully!");
+                            mProgressBar.setVisibility(View.GONE);
+                            mUpdateButton.setVisibility(View.VISIBLE);
+                            Navigation.findNavController(view).navigateUp();
+                        }
 
-                @Override
-                public void onError(Throwable e) {
-                    Timber.e(e, "Error updating database");
-                    mProgressBar.setVisibility(View.GONE);
-                    mUpdateButton.setVisibility(View.VISIBLE);
-                    showToast("Error updating data!");
-                }
-            });
+                        @Override
+                        public void onError(Throwable e) {
+                            Timber.e(e, "Error updating database");
+                            mProgressBar.setVisibility(View.GONE);
+                            mUpdateButton.setVisibility(View.VISIBLE);
+                            showToast("Error updating data!");
+                        }
+                    });
 
+                })
+                .addOnFailureListener(e -> Timber.e(e));
 
-        });
 
     }
 
@@ -424,7 +428,7 @@ public class UpdateFragment extends BaseFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == OPEN_DOCUMENT_CODE && resultCode == RESULT_OK) {
             if (resultData != null) {
-                mMerchantViewModel.getSelectedImage().setValue(resultData.getData());
+                mUpdateViewModel.getSelectedImage().setValue(resultData.getData());
             }
         }
     }

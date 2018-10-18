@@ -13,6 +13,8 @@ import com.nepal.adversify.data.dao.LocationDAO;
 import com.nepal.adversify.data.dao.MerchantDAO;
 import com.nepal.adversify.data.dao.OfferDAO;
 import com.nepal.adversify.data.dao.OpeningDAO;
+import com.nepal.adversify.data.dao.RateDAO;
+import com.nepal.adversify.data.dao.ReviewDAO;
 import com.nepal.adversify.data.database.AppDatabase;
 
 import dagger.Module;
@@ -44,6 +46,16 @@ public class MerchantProviderModule {
     @Provides
     LocationDAO providesLocationDAO(AppDatabase database) {
         return database.locationDAO();
+    }
+
+    @Provides
+    ReviewDAO providesReviewDAO(AppDatabase database) {
+        return database.reviewDAO();
+    }
+
+    @Provides
+    RateDAO providesRateDAO(AppDatabase database) {
+        return database.rateDAO();
     }
 
 }

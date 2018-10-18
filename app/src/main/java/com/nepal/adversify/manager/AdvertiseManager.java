@@ -10,6 +10,7 @@ import com.generic.appbase.domain.dto.DetailMerchantInfo;
 import com.generic.appbase.domain.dto.Location;
 import com.generic.appbase.domain.dto.PayloadData;
 import com.generic.appbase.domain.dto.PreviewMerchantInfo;
+import com.generic.appbase.domain.dto.ReviewInfo;
 import com.generic.appbase.utils.CommonUtils;
 import com.generic.appbase.utils.SerializationUtils;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -23,6 +24,7 @@ import com.nepal.adversify.domain.handler.ConnectionHandler;
 import com.nepal.adversify.domain.handler.PayloadHandler;
 import com.nepal.adversify.domain.model.ClientModel;
 import com.nepal.adversify.domain.model.MerchantModel;
+import com.nepal.adversify.mapper.ReviewInfoToReviewModelMapper;
 import com.nepal.adversify.viewmodel.HomeViewModel;
 import com.nepal.adversify.viewmodel.MerchantViewModel;
 
@@ -44,14 +46,17 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     private Context mContext;
     private final HomeViewModel mHomeViewModel;
     private final MerchantViewModel mMerchantViewModel;
+    private final ReviewInfoToReviewModelMapper reviewInfoToReviewModelMapper;
 
     public AdvertiseManager(final Context context, HomeViewModel mHomeViewModel,
                             ConnectionsClient mConnectionsClient,
-                            MerchantViewModel mMerchantViewModel) {
+                            MerchantViewModel mMerchantViewModel,
+                            ReviewInfoToReviewModelMapper reviewInfoToReviewModelMapper) {
         mContext = context;
         this.mHomeViewModel = mHomeViewModel;
         this.mConnectionsClient = mConnectionsClient;
         this.mMerchantViewModel = mMerchantViewModel;
+        this.reviewInfoToReviewModelMapper = reviewInfoToReviewModelMapper;
 
         mConnectionHandler = new ConnectionHandler(this);
         mPayloadHandler = new PayloadHandler(this);
@@ -60,7 +65,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void startAdvertising() {
         // We were unable to start advertising.
         mConnectionsClient.startAdvertising(
-                Objects.requireNonNull(mMerchantViewModel.getMerchantLiveData().getValue()).title,
+                Objects.requireNonNull(mMerchantViewModel.getCombinedMerchantLiveData().getValue()).title,
                 com.generic.appbase.connection.ConnectionInfo.NEARBY_CONNECTION_SERVICE_ID,
                 mConnectionHandler,
                 new AdvertisingOptions.Builder()
@@ -74,7 +79,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
                             mHomeViewModel.getStatusLiveData().setValue(
                                     String.format(
                                             mContext.getString(R.string.value_broadcasted_merchant_info),
-                                            mMerchantViewModel.getMerchantLiveData().getValue().title
+                                            mMerchantViewModel.getCombinedMerchantLiveData().getValue().title
                                     )
                             );
                         })
@@ -121,7 +126,6 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void onClientDisconnected(String endpointId) {
         Timber.d("onClientDisconnected");
         mHomeViewModel.removeConnectedClient(endpointId);
-//        restartAdvertising();
     }
 
     @Override
@@ -140,7 +144,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     @Override
     public boolean doesMerchantCategoryMatch(int catId) {
         Timber.d("doesMerchantCategoryMatch");
-        Category category = Objects.requireNonNull(mMerchantViewModel.getMerchantLiveData().getValue()).category;
+        Category category = Objects.requireNonNull(mMerchantViewModel.getCombinedMerchantLiveData().getValue()).category;
         return catId == category.ordinal();
     }
 
@@ -148,7 +152,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
         Timber.d("sendInitialPayload");
         PreviewMerchantInfo previewMerchantData = mMerchantViewModel.getPreviewMerchantData();
         if (previewMerchantData.hasFile) {
-            MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
+            MerchantModel value = mMerchantViewModel.getCombinedMerchantLiveData().getValue();
             try {
                 ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(value.image, "r");
                 Payload payloadImage = Payload.fromFile(pfd);
@@ -177,7 +181,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
         Timber.d("sendFullInfoPayload");
         DetailMerchantInfo detailMerchantInfo = mMerchantViewModel.getDetailMerchantInfo();
         if (detailMerchantInfo.hasFile) {
-            MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
+            MerchantModel value = mMerchantViewModel.getCombinedMerchantLiveData().getValue();
             try {
                 ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(value.image, "r");
                 Payload payloadImage = Payload.fromFile(pfd);
@@ -218,16 +222,23 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void onClientDataReceived(String endpointId, long id, Object obj) {
         Timber.d("onClientDataReceived");
         PayloadData payloadData = (PayloadData) obj;
-        if (payloadData.dataType == PayloadData.CLIENT_INFO) {
-            ClientModel clientModel = mapClientInfo((ClientInfo) payloadData);
-            mHomeViewModel.addConnectedClient(endpointId, clientModel);
-        } else if (payloadData.dataType == PayloadData.MERCHANT_DETAIL_INFO) {
-            sendFullInfo(endpointId);
+        switch (payloadData.dataType) {
+            case PayloadData.CLIENT_INFO:
+                ClientModel clientModel = mapClientInfo((ClientInfo) payloadData);
+                mHomeViewModel.addConnectedClient(endpointId, clientModel);
+                break;
+            case PayloadData.MERCHANT_DETAIL_INFO:
+                sendFullInfo(endpointId);
+                break;
+            case PayloadData.MERCHANT_REVIEW_INFO:
+                ReviewInfo reviewInfo = (ReviewInfo) payloadData;
+                mMerchantViewModel.addReviewData(reviewInfoToReviewModelMapper.from(reviewInfo));
+                break;
         }
     }
 
     private ClientModel mapClientInfo(ClientInfo payloadData) {
-        MerchantModel value = mMerchantViewModel.getMerchantLiveData().getValue();
+        MerchantModel value = mMerchantViewModel.getCombinedMerchantLiveData().getValue();
         ClientModel clientModel = new ClientModel();
         clientModel.id = payloadData.id;
         clientModel.name = payloadData.name;

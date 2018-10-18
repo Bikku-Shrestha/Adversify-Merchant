@@ -26,7 +26,10 @@ package com.nepal.adversify.di.module;
 
 
 import android.app.Application;
+import android.content.Context;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.nepal.adversify.BuildConfig;
 import com.nepal.adversify.data.database.AppDatabase;
 
@@ -46,5 +49,10 @@ public class AppModule {
                 .build();
     }
 
+    @Provides
+    @Singleton
+    FusedLocationProviderClient providesFusedLocationProviderClient(Context context) {
+        return LocationServices.getFusedLocationProviderClient(context);
+    }
 
 }

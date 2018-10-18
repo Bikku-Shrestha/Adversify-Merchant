@@ -6,17 +6,21 @@ import com.nepal.adversify.data.dao.LocationDAO;
 import com.nepal.adversify.data.dao.MerchantDAO;
 import com.nepal.adversify.data.dao.OfferDAO;
 import com.nepal.adversify.data.dao.OpeningDAO;
+import com.nepal.adversify.data.dao.RateDAO;
+import com.nepal.adversify.data.dao.ReviewDAO;
 import com.nepal.adversify.data.entity.DiscountEntity;
 import com.nepal.adversify.data.entity.LocationEntity;
 import com.nepal.adversify.data.entity.MerchantEntity;
 import com.nepal.adversify.data.entity.OpeningEntity;
+import com.nepal.adversify.data.entity.RateEntity;
+import com.nepal.adversify.data.entity.ReviewEntity;
 import com.nepal.adversify.data.entity.SpecialOfferEntity;
 
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
 @Database(entities = {MerchantEntity.class, DiscountEntity.class, OpeningEntity.class, SpecialOfferEntity.class,
-        LocationEntity.class},
+        LocationEntity.class, RateEntity.class, ReviewEntity.class},
         version = BuildConfig.VERSION_CODE)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -29,5 +33,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract OpeningDAO openingDAO();
 
     public abstract LocationDAO locationDAO();
+
+    public abstract RateDAO rateDAO();
+
+    public abstract ReviewDAO reviewDAO();
 
 }

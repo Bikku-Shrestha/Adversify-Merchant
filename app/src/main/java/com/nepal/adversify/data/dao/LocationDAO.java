@@ -2,6 +2,7 @@ package com.nepal.adversify.data.dao;
 
 import com.nepal.adversify.data.entity.LocationEntity;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -13,7 +14,7 @@ import androidx.room.Update;
 public interface LocationDAO {
 
     @Query("SELECT * FROM location LIMIT 1")
-    LocationEntity get();
+    LiveData<LocationEntity> get();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(LocationEntity locationEntity);

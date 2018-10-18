@@ -10,5 +10,6 @@ public class PreviewMerchantInfo extends PayloadData implements Serializable {
     public String specialOffer;
     public String discount;
     public String previewImage;
+    public int rating;
 
 }

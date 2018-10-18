@@ -10,6 +10,7 @@ package com.generic.appbase.mapper;
 
 public interface Mapper<From, To> {
 
-    To map(From from);
+    To from(From from);
 
+    From to(To to);
 }

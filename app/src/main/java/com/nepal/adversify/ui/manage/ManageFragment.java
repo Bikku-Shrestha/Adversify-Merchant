@@ -75,7 +75,6 @@ public class ManageFragment extends BaseFragment {
 
         mMerchantViewModel = ViewModelProviders.of(getActivity(), merchantViewModelFactory).get(MerchantViewModel.class);
         observeData();
-        loadData();
     }
 
     @Override
@@ -134,7 +133,7 @@ public class ManageFragment extends BaseFragment {
     private void observeData() {
         Timber.d("Observing livedata");
 
-        mMerchantViewModel.getMerchantLiveData().observe(this, data -> {
+        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, data -> {
             if (data == null) return;
             Timber.d("Merchant title: %s", data.title);
             fillBasicInfo(data);
@@ -145,11 +144,6 @@ public class ManageFragment extends BaseFragment {
             if (data.offerModel != null)
                 fillOfferInfo(data);
         });
-    }
-
-    private void loadData() {
-        Timber.d("loadData");
-        mMerchantViewModel.loadMerchantData();
     }
 
     private void fillOfferInfo(MerchantModel data) {
