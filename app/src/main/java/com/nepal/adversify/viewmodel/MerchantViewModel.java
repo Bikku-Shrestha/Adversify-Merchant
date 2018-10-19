@@ -157,6 +157,7 @@ public class MerchantViewModel extends BaseViewModel {
         merchantInfo.address = merchantModel.address;
         merchantInfo.contact = merchantModel.contact;
         merchantInfo.rating = averageRatingLiveData.getValue() == null ? 0 : averageRatingLiveData.getValue();
+        merchantInfo.location = merchantModel.location;
         if (merchantModel.hasDiscount) {
             Timber.d("has discount");
             merchantInfo.discount = merchantModel.discountModel.title;

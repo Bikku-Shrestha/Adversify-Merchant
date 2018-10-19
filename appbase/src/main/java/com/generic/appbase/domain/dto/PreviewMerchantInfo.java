@@ -11,5 +11,8 @@ public class PreviewMerchantInfo extends PayloadData implements Serializable {
     public String discount;
     public String previewImage;
     public int rating;
+    public Location location;
+    public String distance;
+
 
 }

@@ -151,6 +151,8 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void sendInitialInfo(String endpointId) {
         Timber.d("sendInitialPayload");
         PreviewMerchantInfo previewMerchantData = mMerchantViewModel.getPreviewMerchantData();
+        updateDistance(endpointId, previewMerchantData);
+
         if (previewMerchantData.hasFile) {
             MerchantModel value = mMerchantViewModel.getCombinedMerchantLiveData().getValue();
             try {
@@ -176,6 +178,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
         }
 
     }
+
 
     public void sendFullInfo(String endpointId) {
         Timber.d("sendFullInfoPayload");
@@ -247,9 +250,22 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
         if (value != null) {
             Location from = value.location;
             Location to = payloadData.location;
-            clientModel.distance = String.valueOf((int) CommonUtils.calculateDistance(from, to));
+            clientModel.distance = String.format(
+                    mContext.getString(R.string.distance_surfix), (int) CommonUtils.calculateDistance(from, to));
         }
         return clientModel;
     }
+
+    private void updateDistance(String endpointId, PreviewMerchantInfo previewMerchantData) {
+        //Calculate distance and update it on payload.
+        ClientModel clientModel = mHomeViewModel.getClientInfo(endpointId);
+        if (clientModel != null) {
+            previewMerchantData.distance = String.format(
+                    mContext.getString(R.string.distance_surfix),
+                    (int) CommonUtils.calculateDistance(clientModel.location, previewMerchantData.location)
+            );
+        }
+    }
+
 
 }

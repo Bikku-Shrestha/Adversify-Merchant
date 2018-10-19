@@ -45,10 +45,7 @@ public class ConnectedClientBinder extends ItemBinder<ClientModel, ConnectedClie
         }
 
         holder.name.setText(clientModel.name);
-        holder.distance.setText(String.format(
-                holder.itemView.getContext().getString(R.string.distance_surfix),
-                clientModel.distance
-        ));
+        holder.distance.setText(clientModel.distance);
 
         if (!TextUtils.isEmpty(clientModel.avatar)) {
             Glide.with(holder.itemView.getContext())

@@ -49,4 +49,8 @@ public final class HomeViewModel extends BaseViewModel {
         statusLiveData.setValue(null);
         super.onCleared();
     }
+
+    public ClientModel getClientInfo(String endpointId) {
+        return mConnectedClients.get(endpointId);
+    }
 }
