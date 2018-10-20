@@ -14,56 +14,104 @@
         <include layout="@layout/layout_toolbar" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
-        android:id="@+id/content_container"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            style="@style/AppTheme.Text.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/title_connected_clients"
-            tools:text="Connected Clients" />
-
-        <include layout="@layout/view_highlight_1" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
+        <LinearLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space"
-            tools:listitem="@layout/item_connected_client">
+            android:orientation="vertical">
 
-        </androidx.recyclerview.widget.RecyclerView>
+            <FrameLayout
+                android:id="@+id/status_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image2x"
+                android:background="@drawable/banner">
 
-        <TextView
-            style="@style/AppTheme.Text.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space"
-            android:text="@string/title_latest_reviews"
-            tools:text="Latest Reviews" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/semitransparent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/space">
 
-        <include layout="@layout/view_highlight_1" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/status_text"
+                        style="@style/AppTheme.Text.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space"
+                        android:text="@string/title_not_advertised"
+                        android:textColor="@color/white"
+                        app:chipBackgroundColor="@color/cadet_blue"
+                        tools:text="Not Advertised!" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/review_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space"
-            tools:listitem="@layout/item_review" />
-    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/AppTheme.Text.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:text="@string/title_connected_clients"
+                    tools:text="Connected Clients" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_connected_client">
+
+                </androidx.recyclerview.widget.RecyclerView>
+
+                <TextView
+                    style="@style/AppTheme.Text.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:text="@string/title_latest_reviews"
+                    tools:text="Latest Reviews" />
+
+                <include layout="@layout/view_highlight_1" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/review_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_review" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/discoverButton"
+        android:id="@+id/advertiseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@+id/status_container"
+        app:layout_anchorGravity="bottom|start"
         app:srcCompat="@drawable/ic_wifi_tethering_black_24dp"
         app:tint="@color/white"
         app:useCompatPadding="true" />
@@ -72,11 +120,9 @@
         android:id="@+id/manageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:backgroundTint="@color/green"
-        app:layout_anchor="@+id/discoverButton"
-        app:layout_anchorGravity="top|center_horizontal"
         app:srcCompat="@drawable/ic_edit_black_24dp"
         app:tint="@color/white" />
 

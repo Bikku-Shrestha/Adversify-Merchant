@@ -76,17 +76,12 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
                         unusedResult -> {
                             // We're advertising!
                             Timber.d("Broadcasted successfully");
-                            mHomeViewModel.getStatusLiveData().setValue(
-                                    String.format(
-                                            mContext.getString(R.string.value_broadcasted_merchant_info),
-                                            mMerchantViewModel.getCombinedMerchantLiveData().getValue().title
-                                    )
-                            );
+                            mHomeViewModel.getStatusLiveData().setValue("Advertising");
                         })
                 .addOnFailureListener(
                         e -> {
                             Timber.d("Error broadcasting information");
-                            mHomeViewModel.getStatusLiveData().setValue(mContext.getString(R.string.value_error_broadcasting));
+                            mHomeViewModel.getStatusLiveData().setValue("Error Advertising");
                         });
     }
 

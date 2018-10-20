@@ -12,6 +12,7 @@ import com.ahamed.multiviewadapter.SimpleRecyclerAdapter;
 import com.generic.appbase.domain.event.OnItemClickCallback;
 import com.generic.appbase.ui.BaseFragment;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -43,7 +44,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -78,9 +78,11 @@ public class HomeFragment extends BaseFragment implements
     private FloatingActionButton mAdvertiseFloatingActionButton;
     private RecyclerView mConnectedMerchantRecyclerview;
     private RecyclerView mReviewRecyclerView;
+    private Chip mStatusTextView;
 
     private boolean isMerchantInfoAvailable = false;
     private boolean isPermissionGranted = false;
+    private boolean isAdvertised;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -207,30 +209,34 @@ public class HomeFragment extends BaseFragment implements
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
 
-        mAdvertiseFloatingActionButton = view.findViewById(R.id.discoverButton);
+        mAdvertiseFloatingActionButton = view.findViewById(R.id.advertiseButton);
         FloatingActionButton mManageFloatingActionButton = view.findViewById(R.id.manageButton);
         mManageFloatingActionButton.setOnClickListener((v) -> {
             Timber.d("Manage button clicked");
-            NavOptions navOptions = new NavOptions.Builder()
-                    .setEnterAnim(R.anim.enter_from_right)
-                    .setExitAnim(R.anim.exit_to_left)
-                    .setPopEnterAnim(R.anim.enter_from_left)
-                    .setPopExitAnim(R.anim.exit_to_right)
-                    .build();
 
-            Navigation.findNavController(v).navigate(R.id.manageFragment, null, navOptions);
+            Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_manageFragment);
         });
 
         mAdvertiseFloatingActionButton.setOnClickListener((v) -> {
             Timber.d("Broadcast button clicked");
-            if (isPermissionGranted && isMerchantInfoAvailable) {
-                mAdvertiseFloatingActionButton.setEnabled(false);
-                mAdvertiseManager.startAdvertising();
+            if (isAdvertised) {
+                isAdvertised = false;
+                mAdvertiseManager.stopAdvertising();
+                mAdvertiseFloatingActionButton.setImageResource(R.drawable.ic_wifi_tethering_black_24dp);
+                mHomeViewModel.getStatusLiveData().setValue("Not Advertised!");
             } else {
-                showToast("First update information before advertising.");
+                if (isPermissionGranted && isMerchantInfoAvailable) {
+                    isAdvertised = true;
+                    mHomeViewModel.getStatusLiveData().setValue("Wait...");
+                    mAdvertiseManager.startAdvertising();
+                    mAdvertiseFloatingActionButton.setImageResource(R.drawable.ic_cancel_black_24dp);
+                } else {
+                    showToast("First update information before advertising.");
+                }
             }
         });
 
+        mStatusTextView = view.findViewById(R.id.status_text);
         mConnectedMerchantRecyclerview = view.findViewById(R.id.recycler_view);
         mConnectedMerchantRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
         mConnectedMerchantRecyclerview.setHasFixedSize(true);
@@ -261,7 +267,7 @@ public class HomeFragment extends BaseFragment implements
         mHomeViewModel.getStatusLiveData().observe(this, data -> {
             if (data != null) {
                 Timber.d(data);
-                showToast(data);
+                mStatusTextView.setText(data);
             }
         });
 

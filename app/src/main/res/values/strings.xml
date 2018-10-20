@@ -38,4 +38,5 @@
     <string name="title_category">Category</string>
     <string name="prompt_select_category">Select Category</string>
     <string name="title_latest_reviews">Latest Reviews</string>
+    <string name="title_not_advertised">Not Advertised!</string>
 </resources>
