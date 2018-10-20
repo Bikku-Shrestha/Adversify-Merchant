@@ -34,9 +34,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space"
-            android:layout_weight="1"
             tools:listitem="@layout/item_connected_client">
 
         </androidx.recyclerview.widget.RecyclerView>
@@ -54,9 +53,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/review_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space"
-            android:layout_weight="1"
             tools:listitem="@layout/item_review" />
     </LinearLayout>
 

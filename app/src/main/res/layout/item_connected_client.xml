@@ -20,6 +20,8 @@
             android:layout_width="@dimen/image_medium"
             android:layout_height="@dimen/image_medium"
             android:scaleType="centerInside"
+            app:civ_border_color="@color/gray"
+            app:civ_border_width="@dimen/two_dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/default_avatar" />
@@ -37,13 +39,12 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/distance"
-            style="@style/AppTheme.Text.Regular.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/space"
             android:layout_marginTop="@dimen/four_dp"
             android:textColor="@color/colorSecondaryText"
-            app:chipBackgroundColor="@color/green"
+            app:chipBackgroundColor="?attr/colorPrimaryDark"
             app:layout_constraintStart_toEndOf="@+id/avatar"
             app:layout_constraintTop_toBottomOf="@+id/name"
             tools:text="20 feet" />

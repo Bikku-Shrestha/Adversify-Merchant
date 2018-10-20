@@ -22,10 +22,9 @@ public final class HomeViewModel extends BaseViewModel {
     }
 
     public void addConnectedClient(String clientId, ClientModel clientModel) {
-        if (!mConnectedClients.containsKey(clientId)) {
-            mConnectedClients.put(clientId, clientModel);
-            connectedClientLiveData.setValue(mConnectedClients);
-        }
+        mConnectedClients.remove(clientId);
+        mConnectedClients.put(clientId, clientModel);
+        connectedClientLiveData.setValue(mConnectedClients);
     }
 
     public void removeConnectedClient(String endpointId) {

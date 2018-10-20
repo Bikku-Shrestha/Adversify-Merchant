@@ -126,6 +126,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void onClientDisconnected(String endpointId) {
         Timber.d("onClientDisconnected");
         mHomeViewModel.removeConnectedClient(endpointId);
+        restartAdvertising();
     }
 
     @Override
@@ -151,8 +152,6 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     public void sendInitialInfo(String endpointId) {
         Timber.d("sendInitialPayload");
         PreviewMerchantInfo previewMerchantData = mMerchantViewModel.getPreviewMerchantData();
-        updateDistance(endpointId, previewMerchantData);
-
         if (previewMerchantData.hasFile) {
             MerchantModel value = mMerchantViewModel.getCombinedMerchantLiveData().getValue();
             try {
@@ -222,9 +221,8 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
     }
 
     @Override
-    public void onClientDataReceived(String endpointId, long id, Object obj) {
-        Timber.d("onClientDataReceived");
-        PayloadData payloadData = (PayloadData) obj;
+    public void onBytePayloadReceived(String endpointId, long id, PayloadData payloadData) {
+        Timber.d("onBytePayloadReceived");
         switch (payloadData.dataType) {
             case PayloadData.CLIENT_INFO:
                 ClientModel clientModel = mapClientInfo((ClientInfo) payloadData);
@@ -237,6 +235,16 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
                 ReviewInfo reviewInfo = (ReviewInfo) payloadData;
                 mMerchantViewModel.addReviewData(reviewInfoToReviewModelMapper.from(reviewInfo));
                 break;
+        }
+    }
+
+    @Override
+    public void onFilePayloadReceived(String endpointId, long id, PayloadData payloadData) {
+        Timber.d("onFilePayloadReceived to id: %s", endpointId);
+        if (payloadData.dataType == PayloadData.CLIENT_INFO) {
+            ClientModel clientModel = mHomeViewModel.getClientInfo(endpointId);
+            clientModel.avatar = payloadData.fileName;
+            mHomeViewModel.addConnectedClient(endpointId, clientModel);
         }
     }
 
@@ -254,17 +262,6 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
                     mContext.getString(R.string.distance_surfix), (int) CommonUtils.calculateDistance(from, to));
         }
         return clientModel;
-    }
-
-    private void updateDistance(String endpointId, PreviewMerchantInfo previewMerchantData) {
-        //Calculate distance and update it on payload.
-        ClientModel clientModel = mHomeViewModel.getClientInfo(endpointId);
-        if (clientModel != null) {
-            previewMerchantData.distance = String.format(
-                    mContext.getString(R.string.distance_surfix),
-                    (int) CommonUtils.calculateDistance(clientModel.location, previewMerchantData.location)
-            );
-        }
     }
 
 

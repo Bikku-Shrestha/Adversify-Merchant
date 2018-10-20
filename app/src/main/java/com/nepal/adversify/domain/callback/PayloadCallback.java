@@ -1,5 +1,6 @@
 package com.nepal.adversify.domain.callback;
 
+import com.generic.appbase.domain.dto.PayloadData;
 import com.google.android.gms.nearby.connection.Payload;
 
 public interface PayloadCallback {
@@ -8,6 +9,7 @@ public interface PayloadCallback {
 
     void onSendPayload(String endpointId, Payload payload);
 
-    void onClientDataReceived(String endpointId, long id, Object obj);
+    void onBytePayloadReceived(String endpointId, long id, PayloadData data);
 
+    void onFilePayloadReceived(String endpointId, long id, PayloadData data);
 }

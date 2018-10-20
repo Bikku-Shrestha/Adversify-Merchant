@@ -7,10 +7,10 @@
   -->
 
 <resources>
-    <color name="colorPrimary">@color/white</color>
-    <color name="colorPrimaryDark">@color/light_grey</color>
+    <color name="colorPrimary">@color/lime_green</color>
+    <color name="colorPrimaryDark">@color/medium_sea_green</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="colorPrimaryText">@color/dark_gray</color>
+    <color name="colorPrimaryText">@color/black</color>
     <color name="colorSecondaryText">@color/white</color>
 
     <color name="text_header_secondary">#a9a5c2</color>

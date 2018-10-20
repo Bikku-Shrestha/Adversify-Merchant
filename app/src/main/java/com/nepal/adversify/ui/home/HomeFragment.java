@@ -76,7 +76,8 @@ public class HomeFragment extends BaseFragment implements
     private SimpleRecyclerAdapter<ReviewModel, ReviewBinder> mReviewAdapter;
 
     private FloatingActionButton mAdvertiseFloatingActionButton;
-    private View mContentView;
+    private RecyclerView mConnectedMerchantRecyclerview;
+    private RecyclerView mReviewRecyclerView;
 
     private boolean isMerchantInfoAvailable = false;
     private boolean isPermissionGranted = false;
@@ -102,8 +103,8 @@ public class HomeFragment extends BaseFragment implements
     private Observer<List<ReviewModel>> reviewsObserver = data -> {
         if (data != null) {
             Timber.d("Total Reviews: %d", data.size());
+            mReviewRecyclerView.setAdapter(mReviewAdapter);
             mReviewAdapter.setData(data);
-            mContentView.invalidate();
         }
     };
 
@@ -207,7 +208,6 @@ public class HomeFragment extends BaseFragment implements
         NavigationUI.setupWithNavController(mToolbar, Navigation.findNavController(view));
 
         mAdvertiseFloatingActionButton = view.findViewById(R.id.discoverButton);
-        mContentView = view.findViewById(R.id.content_container);
         FloatingActionButton mManageFloatingActionButton = view.findViewById(R.id.manageButton);
         mManageFloatingActionButton.setOnClickListener((v) -> {
             Timber.d("Manage button clicked");
@@ -231,16 +231,14 @@ public class HomeFragment extends BaseFragment implements
             }
         });
 
-        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setHasFixedSize(true);
+        mConnectedMerchantRecyclerview = view.findViewById(R.id.recycler_view);
+        mConnectedMerchantRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+        mConnectedMerchantRecyclerview.setHasFixedSize(true);
         mConnectedAdapter = new SimpleRecyclerAdapter<>(mBinder);
-        mRecyclerView.setAdapter(mConnectedAdapter);
 
-        RecyclerView mReviewRecyclerView = view.findViewById(R.id.review_recycler_view);
+        mReviewRecyclerView = view.findViewById(R.id.review_recycler_view);
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mReviewAdapter = new SimpleRecyclerAdapter<>(mReviewBinder);
-        mReviewRecyclerView.setAdapter(mReviewAdapter);
 
         return view;
     }
@@ -253,9 +251,11 @@ public class HomeFragment extends BaseFragment implements
         mMerchantViewModel.getReviewsLiveData().observe(this, reviewsObserver);
 
         mHomeViewModel.getConnectedClient().observe(this, data -> {
-            Timber.d("Total connected clients: %d", data.size());
-            mConnectedAdapter.setData(new ArrayList<>(data.values()));
-
+            if (data != null) {
+                Timber.d("Total connected clients: %d", data.size());
+                mConnectedMerchantRecyclerview.setAdapter(mConnectedAdapter);
+                mConnectedAdapter.setData(new ArrayList<>(data.values()));
+            }
         });
 
         mHomeViewModel.getStatusLiveData().observe(this, data -> {
@@ -275,5 +275,11 @@ public class HomeFragment extends BaseFragment implements
         mMerchantViewModel.loadCombinedMerchantData();
     }
 
-
+    @Override
+    public void onStop() {
+        mMerchantViewModel.getCombinedMerchantLiveData().removeObserver(merchantModelObserver);
+        mMerchantViewModel.getReviewsLiveData().removeObserver(reviewsObserver);
+        mHomeViewModel.getStatusLiveData().setValue(null);
+        super.onStop();
+    }
 }

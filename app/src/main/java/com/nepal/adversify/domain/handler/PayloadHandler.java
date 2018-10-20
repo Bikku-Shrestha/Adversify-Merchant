@@ -34,7 +34,7 @@ public class PayloadHandler extends PayloadCallback {
             if (payloadData.hasFile) {
                 filePayloads.put(payloadData.fileId, payloadData);
             }
-            payloadCallback.onClientDataReceived(endpointId, payload.getId(), payloadData);
+            payloadCallback.onBytePayloadReceived(endpointId, payload.getId(), payloadData);
         } else
             incomingPayloads.put(payload.getId(), payload);
     }
@@ -46,14 +46,15 @@ public class PayloadHandler extends PayloadCallback {
             Payload payload = incomingPayloads.get(payloadId);
             switch (payload.getType()) {
                 case Payload.Type.FILE:
+                    Timber.d("File payload update..");
                     if (update.getStatus() == PayloadTransferUpdate.Status.SUCCESS) {
                         incomingPayloads.remove(payloadId);
-                        Timber.d("FIle payload received");
                         PayloadData filePayloadData = filePayloads.remove(payload.getId());
                         File payloadFile = payload.asFile().asJavaFile();
-                        payloadFile.renameTo(new File(payloadFile.getParentFile(), filePayloadData.fileName));
-                        filePayloadData.fileName = payloadFile.getAbsolutePath();
-                        payloadCallback.onClientDataReceived(endpointId, payload.getId(), filePayloadData);
+                        File renamedFile = new File(payloadFile.getParentFile(), filePayloadData.fileName);
+                        payloadFile.renameTo(renamedFile);
+                        filePayloadData.fileName = renamedFile.getAbsolutePath();
+                        payloadCallback.onFilePayloadReceived(endpointId, payload.getId(), filePayloadData);
                     }
                     break;
                 case Payload.Type.STREAM:

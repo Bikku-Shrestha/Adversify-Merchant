@@ -263,6 +263,7 @@ public class UpdateFragment extends BaseFragment {
             Glide.with(getContext())
                     .load(data.image)
                     .into(mPreviewImageView);
+            mUpdateViewModel.getSelectedImage().setValue(data.image);
         }
     }
 
