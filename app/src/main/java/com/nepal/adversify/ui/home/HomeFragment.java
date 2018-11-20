@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.ahamed.multiviewadapter.SimpleRecyclerAdapter;
 import com.generic.appbase.domain.event.OnItemClickCallback;
@@ -46,6 +47,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import timber.log.Timber;
@@ -213,7 +215,7 @@ public class HomeFragment extends BaseFragment implements
         FloatingActionButton mManageFloatingActionButton = view.findViewById(R.id.manageButton);
         mManageFloatingActionButton.setOnClickListener((v) -> {
             Timber.d("Manage button clicked");
-
+            mAdvertiseManager.stopAdvertising();
             Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_manageFragment);
         });
 
@@ -244,6 +246,8 @@ public class HomeFragment extends BaseFragment implements
 
         mReviewRecyclerView = view.findViewById(R.id.review_recycler_view);
         mReviewRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext(), LinearLayout.VERTICAL);
+        mReviewRecyclerView.addItemDecoration(itemDecoration);
         mReviewAdapter = new SimpleRecyclerAdapter<>(mReviewBinder);
 
         return view;

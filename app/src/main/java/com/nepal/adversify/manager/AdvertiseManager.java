@@ -228,6 +228,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
                 break;
             case PayloadData.MERCHANT_REVIEW_INFO:
                 ReviewInfo reviewInfo = (ReviewInfo) payloadData;
+                Timber.d("Review Title: %s|star %d", reviewInfo.content, reviewInfo.star);
                 mMerchantViewModel.addReviewData(reviewInfoToReviewModelMapper.from(reviewInfo));
                 break;
         }
@@ -250,6 +251,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
         clientModel.name = payloadData.name;
         clientModel.avatar = payloadData.avatar;
         clientModel.location = payloadData.location;
+        clientModel.hasFile = payloadData.hasFile;
         if (value != null) {
             Location from = value.location;
             Location to = payloadData.location;

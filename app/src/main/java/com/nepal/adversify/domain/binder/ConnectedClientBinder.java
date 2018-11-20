@@ -47,7 +47,7 @@ public class ConnectedClientBinder extends ItemBinder<ClientModel, ConnectedClie
         holder.name.setText(clientModel.name);
         holder.distance.setText(clientModel.distance);
 
-        if (!TextUtils.isEmpty(clientModel.avatar)) {
+        if (!TextUtils.isEmpty(clientModel.avatar) && clientModel.hasFile) {
             Glide.with(holder.itemView.getContext())
                     .load(clientModel.avatar)
                     .into(holder.avatar);

@@ -4,7 +4,6 @@ import com.nepal.adversify.data.entity.SpecialOfferEntity;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -22,7 +21,7 @@ public interface OfferDAO {
     @Update
     void update(SpecialOfferEntity offerEntity);
 
-    @Delete
-    void delete(SpecialOfferEntity offerEntity);
+    @Query("DELETE FROM offer")
+    void delete();
 
 }

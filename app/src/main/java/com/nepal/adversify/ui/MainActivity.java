@@ -24,8 +24,6 @@ public class MainActivity extends BaseActivity {
         super.onViewReady(savedInstanceState, intent);
         Timber.d("onViewReady");
 
-        mPreferenceHelper.setKeyMerchantCategoryId(0);
-
     }
 
     @Override

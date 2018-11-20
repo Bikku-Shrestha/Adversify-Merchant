@@ -1,6 +1,7 @@
 package com.nepal.adversify.ui.manage;
 
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 
@@ -16,6 +17,7 @@ import com.nepal.adversify.viewmodel.MerchantViewModelFactory;
 import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -100,7 +102,7 @@ public class ManageFragment extends BaseFragment {
         });
         deleteButton.setOnClickListener((v) -> {
             Timber.d("Delete button clicked");
-
+            onDeleteInfo(v);
         });
 
         mNameTextView = view.findViewById(R.id.name);
@@ -123,6 +125,31 @@ public class ManageFragment extends BaseFragment {
         mDescriptionTextView = view.findViewById(R.id.description);
 
         return view;
+    }
+
+    private void onDeleteInfo(View v) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Delete?");
+        builder.setMessage("Are you sure, you want to delete this information?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int arg1) {
+                mMerchantViewModel.deleteData();
+                dialog.cancel();
+                showToast("Information Deleted!");
+                Navigation.findNavController(v).navigateUp();
+
+            }
+        });
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int arg1) {
+                dialog.cancel();
+            }
+
+        });
+
+        builder.show();
     }
 
     @Override

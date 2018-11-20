@@ -331,4 +331,30 @@ public class MerchantRepository {
                 });
     }
 
+    public void delete() {
+        Completable.fromAction(() -> {
+            mMerchantDAO.delete();
+            mLocationDAO.delete();
+            mDiscountDAO.delete();
+            mOfferDAO.delete();
+            mOpeningDAO.delete();
+        }).subscribeOn(mScheduler.io())
+                .observeOn(mScheduler.ui())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Timber.d("Info deleted from database");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.e(e, "Error deleting info");
+                    }
+                });
+    }
 }

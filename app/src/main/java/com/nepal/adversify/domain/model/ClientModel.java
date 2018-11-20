@@ -9,5 +9,6 @@ public class ClientModel {
     public String avatar;
     public Location location;
     public String distance;
+    public boolean hasFile;
 
 }

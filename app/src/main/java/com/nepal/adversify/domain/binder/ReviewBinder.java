@@ -34,7 +34,7 @@ public class ReviewBinder extends ItemBinder<ReviewModel, ReviewBinder.ViewHolde
 
         if (reviewInfo == null)
             return;
-
+        Timber.d("Review:%s, Rating: %d, Client:%s", reviewInfo.review, reviewInfo.star, reviewInfo.clientId);
         holder.name.setText(reviewInfo.clientName);
         holder.content.setText(reviewInfo.review);
         holder.ratingBar.setRating(reviewInfo.star);

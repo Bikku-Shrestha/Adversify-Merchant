@@ -4,7 +4,6 @@ import com.nepal.adversify.data.entity.OpeningEntity;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -22,7 +21,7 @@ public interface OpeningDAO {
     @Update
     void update(OpeningEntity openingEntity);
 
-    @Delete
-    void delete(OpeningEntity openingEntity);
+    @Query("DELETE FROM opening_info")
+    void delete();
 
 }

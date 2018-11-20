@@ -210,7 +210,7 @@ public class MerchantViewModel extends BaseViewModel {
         }
         if (merchantModel.image != null) {
             merchantInfo.fileName = FileUtils.getExtensionWithName(getApplication(), merchantModel.image);
-            merchantInfo.hasFile = true;
+            merchantInfo.hasFile = false;
         } else {
             merchantInfo.hasFile = false;
         }
@@ -281,4 +281,7 @@ public class MerchantViewModel extends BaseViewModel {
     }
 
 
+    public void deleteData() {
+        mMerchantRepository.delete();
+    }
 }

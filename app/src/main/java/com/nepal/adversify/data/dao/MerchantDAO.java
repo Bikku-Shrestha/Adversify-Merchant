@@ -5,7 +5,6 @@ import com.nepal.adversify.data.entity.MerchantEntity;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -36,7 +35,7 @@ public interface MerchantDAO {
     @Update
     void update(MerchantEntity merchantEntity);
 
-    @Delete
-    void delete(MerchantEntity merchantEntity);
+    @Query("DELETE FROM merchant")
+    void delete();
 
 }

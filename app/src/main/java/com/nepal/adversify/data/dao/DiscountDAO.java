@@ -4,7 +4,6 @@ import com.nepal.adversify.data.entity.DiscountEntity;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -22,7 +21,7 @@ public interface DiscountDAO {
     @Update
     void update(DiscountEntity discountEntity);
 
-    @Delete
-    void delete(DiscountEntity discountEntity);
+    @Query("DELETE FROM discount")
+    void delete();
 
 }
