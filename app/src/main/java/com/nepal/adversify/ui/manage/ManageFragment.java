@@ -23,6 +23,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
@@ -157,21 +158,17 @@ public class ManageFragment extends BaseFragment {
         return R.layout.fragment_manage;
     }
 
-    private void observeData() {
-        Timber.d("Observing livedata");
-
-        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, data -> {
-            if (data == null) return;
-            Timber.d("Merchant title: %s", data.title);
-            fillBasicInfo(data);
-            if (data.openingModel != null)
-                fillOpeningInfo(data);
-            if (data.discountModel != null)
-                fillDiscountInfo(data);
-            if (data.offerModel != null)
-                fillOfferInfo(data);
-        });
-    }
+    private Observer<MerchantModel> merchantModelObserver = data -> {
+        if (data == null) return;
+        Timber.d("Merchant title: %s", data.title);
+        fillBasicInfo(data);
+        if (data.openingModel != null)
+            fillOpeningInfo(data);
+        if (data.discountModel != null)
+            fillDiscountInfo(data);
+        if (data.offerModel != null)
+            fillOfferInfo(data);
+    };
 
     private void fillOfferInfo(MerchantModel data) {
         mDealsTitleTextView.setText(data.offerModel.title);
@@ -209,4 +206,15 @@ public class ManageFragment extends BaseFragment {
             mImagePreviewImageView.setVisibility(View.INVISIBLE);
     }
 
+    private void observeData() {
+        Timber.d("Observing livedata");
+
+        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, merchantModelObserver);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMerchantViewModel.getCombinedMerchantLiveData().removeObserver(merchantModelObserver);
+    }
 }

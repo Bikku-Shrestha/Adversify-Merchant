@@ -39,6 +39,7 @@ import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
@@ -173,36 +174,19 @@ public class UpdateFragment extends BaseFragment {
         return R.layout.fragment_update;
     }
 
-    private void observeData() {
-        Timber.d("Observing livedata");
+    private Observer<MerchantModel> merchantModelObserver = data -> {
+        if (data == null) return;
 
-        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, data -> {
-            if (data == null) return;
-
-            fillBasicInfo(data);
-            if (data.openingModel != null)
-                fillOpeningInfo(data);
-            if (data.discountModel != null)
-                fillDiscountInfo(data);
-            if (data.offerModel != null)
-                fillOfferInfo(data);
+        fillBasicInfo(data);
+        if (data.openingModel != null)
+            fillOpeningInfo(data);
+        if (data.discountModel != null)
+            fillDiscountInfo(data);
+        if (data.offerModel != null)
+            fillOfferInfo(data);
 
 
-        });
-        mUpdateViewModel.getSelectedImage().observe(this, data -> {
-            if (data == null) {
-                mPreviewImageView.setBackgroundDrawable(null);
-                mImageClearButton.setVisibility(View.INVISIBLE);
-                mPreviewImageView.setVisibility(View.INVISIBLE);
-            } else {
-                mImageClearButton.setVisibility(View.VISIBLE);
-                mPreviewImageView.setVisibility(View.VISIBLE);
-                Glide.with(getContext())
-                        .load(data)
-                        .into(mPreviewImageView);
-            }
-        });
-    }
+    };
 
     private void initCategorySpinner(View view) {
 
@@ -425,6 +409,25 @@ public class UpdateFragment extends BaseFragment {
 
     }
 
+    private void observeData() {
+        Timber.d("Observing livedata");
+
+        mMerchantViewModel.getCombinedMerchantLiveData().observe(this, merchantModelObserver);
+        mUpdateViewModel.getSelectedImage().observe(this, data -> {
+            if (data == null) {
+                mPreviewImageView.setBackgroundDrawable(null);
+                mImageClearButton.setVisibility(View.INVISIBLE);
+                mPreviewImageView.setVisibility(View.INVISIBLE);
+            } else {
+                mImageClearButton.setVisibility(View.VISIBLE);
+                mPreviewImageView.setVisibility(View.VISIBLE);
+                Glide.with(getContext())
+                        .load(data)
+                        .into(mPreviewImageView);
+            }
+        });
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == OPEN_DOCUMENT_CODE && resultCode == RESULT_OK) {
@@ -434,5 +437,9 @@ public class UpdateFragment extends BaseFragment {
         }
     }
 
-
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMerchantViewModel.getCombinedMerchantLiveData().removeObserver(merchantModelObserver);
+    }
 }

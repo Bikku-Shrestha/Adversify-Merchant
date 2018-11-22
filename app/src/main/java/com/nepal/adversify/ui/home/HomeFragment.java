@@ -226,6 +226,7 @@ public class HomeFragment extends BaseFragment implements
                 mAdvertiseManager.stopAdvertising();
                 mAdvertiseFloatingActionButton.setImageResource(R.drawable.ic_wifi_tethering_black_24dp);
                 mHomeViewModel.getStatusLiveData().setValue("Not Advertised!");
+                mHomeViewModel.getConnectedClient().setValue(null);
             } else {
                 if (isPermissionGranted && isMerchantInfoAvailable) {
                     isAdvertised = true;
@@ -265,6 +266,8 @@ public class HomeFragment extends BaseFragment implements
                 Timber.d("Total connected clients: %d", data.size());
                 mConnectedMerchantRecyclerview.setAdapter(mConnectedAdapter);
                 mConnectedAdapter.setData(new ArrayList<>(data.values()));
+            } else {
+                mConnectedAdapter.getDataManager().clear();
             }
         });
 

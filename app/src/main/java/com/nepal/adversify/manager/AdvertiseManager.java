@@ -80,7 +80,7 @@ public class AdvertiseManager implements ConnectionCallback, PayloadCallback {
                         })
                 .addOnFailureListener(
                         e -> {
-                            Timber.d("Error broadcasting information");
+                            Timber.e(e, "Error broadcasting information");
                             mHomeViewModel.getStatusLiveData().setValue("Error Advertising");
                         });
     }
